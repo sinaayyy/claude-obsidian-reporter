@@ -22,6 +22,7 @@ Forgot to run it yesterday? No problem — the skill **auto-detects missing days
 - [Obsidian](https://obsidian.md) with the **Obsidian CLI** community plugin enabled
 - [Claude Code](https://claude.ai/claude-code) installed and authenticated
 - Git 2.x+
+- [Dataview](https://github.com/blacksmithgu/obsidian-dataview) plugin (optional — required for the auto-generated dashboard)
 
 ## Install
 

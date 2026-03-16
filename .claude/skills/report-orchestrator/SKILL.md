@@ -68,6 +68,21 @@ If `IS_LAST_DAY`: also run **monthly**
 
 Read `projects.config` (format: `ProjectName|/absolute/path|optional_git_url`, lines starting with `#` are comments).
 
+## Step 3b — Bootstrap dashboard (first run only)
+
+Check if the dashboard exists:
+```bash
+obsidian vault="VAULT" file path="Reports/Dashboard.md"
+```
+
+- If it **exists** → skip
+- If it **does not exist** → read `Templates/dashboard-template.md` and write it:
+```bash
+obsidian vault="VAULT" create path="Reports/Dashboard.md" content="<contents of dashboard-template.md>"
+```
+
+The dashboard uses Dataview queries that auto-refresh from report frontmatter — it never needs to be rewritten after creation.
+
 ## Step 4 — Auto-catchup missing days this week
 
 Before processing today, check for missing daily reports earlier this week (from `WEEK_START` to `DATE - 1 day`). For each past day in that range:
