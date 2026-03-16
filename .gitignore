@@ -1,0 +1,10 @@
+logs/
+*.log
+.DS_Store
+Thumbs.db
+
+# Local config — contains personal paths, never commit
+projects.config
+
+# Contains GITHUB_TOKEN — never commit
+.env

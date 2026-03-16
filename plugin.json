@@ -1,0 +1,21 @@
+{
+  "name": "claude-obsidian-reporter",
+  "version": "1.1.0",
+  "description": "End-of-day Claude Code skill that tracks your Git activity and writes structured daily, weekly, and monthly reports into your Obsidian vault.",
+  "author": "sinaayyy",
+  "homepage": "https://github.com/sinaayyy/claude-obsidian-reporter",
+  "repository": "https://github.com/sinaayyy/claude-obsidian-reporter",
+  "license": "MIT",
+  "keywords": [
+    "obsidian",
+    "git",
+    "reporting",
+    "daily-notes",
+    "weekly-review",
+    "productivity",
+    "worklog"
+  ],
+  "skills": [
+    ".claude/skills/report-orchestrator"
+  ]
+}
