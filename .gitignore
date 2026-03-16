@@ -5,6 +5,7 @@ Thumbs.db
 
 # Local config — contains personal paths, never commit
 projects.config
+.claude/settings.local.json
 
 # Contains GITHUB_TOKEN — never commit
 .env
