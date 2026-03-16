@@ -9,7 +9,7 @@
 
 That's it. No copy-pasting, no manual writing. Just one command.
 
-<img src="dashboard_preview_img.jpg" height="200" alt="Reports Dashboard" /> <img src="graph_example.png" height="200" alt="Graph View" />
+<img src="docs/dashboard_preview_img.jpg" height="200" alt="Reports Dashboard" /> <img src="docs/graph_example.png" height="200" alt="Graph View" />
 
 ## What you get
 
