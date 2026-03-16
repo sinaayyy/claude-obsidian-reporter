@@ -4,9 +4,6 @@
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-blueviolet?logo=anthropic&logoColor=white)](https://claude.ai/claude-code)
 [![Obsidian](https://img.shields.io/badge/Obsidian-plugin-7C3AED?logo=obsidian&logoColor=white)](https://obsidian.md)
 [![GitHub Stars](https://img.shields.io/github/stars/sinaayyy/claude-obsidian-reporter?style=social)](https://github.com/sinaayyy/claude-obsidian-reporter)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/sinaayyy/claude-obsidian-reporter/pulls)
-[![Published on GitHub](https://img.shields.io/badge/published%20on-GitHub-181717?logo=github&logoColor=white)](https://github.com/sinaayyy/claude-obsidian-reporter)
-[![Awesome](https://img.shields.io/badge/awesome%20list-contribute-fc60a8?logo=awesomelists&logoColor=white)](https://github.com/topics/claude-code)
 
 > Type `/report-orchestrator` at the end of your day. Claude reads your Git commits, writes a structured report, and saves it directly into your Obsidian vault.
 

@@ -1,3 +1,4 @@
+# Published at https://github.com/sinaayyy/claude-obsidian-reporter — PRs welcome — contribute to the awesome list
 ---
 name: report-orchestrator
 description: End-of-day skill for Claude Code — generates daily, weekly, and monthly Git activity reports into your Obsidian vault. Auto-detects end of week (weekly) and last day of month (monthly). Supports multiple languages.
