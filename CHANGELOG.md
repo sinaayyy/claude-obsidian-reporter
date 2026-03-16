@@ -6,6 +6,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [2.0.0] — 2026-03-16
+
+### Added
+- **Obsidian graph hierarchy** — all reports linked via `parent` frontmatter (Daily → Weekly → Monthly → Project index → Dashboard), creating a visual tree in Obsidian graph view
+- **Project index pages** — auto-generated `PROJECT/PROJECT.md` listing all months and weeks, rebuilt on each monthly run to accumulate links (makes the project node visually larger in the graph)
+- **Dataview dashboard** — `Reports/Dashboard.md` bootstrapped on first run with live queries for recent daily, weekly, and monthly reports
+- **Tags in frontmatter** — `report/daily`, `report/weekly`, `report/monthly`, `project/PROJECT` for graph coloring and filtering
+- **`backfill` parameter** — `/report-orchestrator backfill=all` or `backfill=YYYY-MM-DD` generates all missing reports from a chosen date; ideal for first install on existing projects
+- **`WEEK_END_DAY` in `.env`** — configurable end-of-week day for weekly report trigger (default: 5 = Friday; set to 7 for Sunday, etc.)
+- **Graph color config** — `graph.json` pre-configured with color groups by report type and project
+- **Cost section in README** — noted as low-cost (Git log reads + Markdown writes)
+- **Graph and dashboard screenshots** in README
+
+### Changed
+- **Wikilink paths corrected** — no `Reports/` prefix in wikilinks (vault root IS the Reports folder)
+- **`{{parent_project}}` placeholder** added to monthly template (points to project index, not Dashboard)
+- **Placeholder descriptions clarified** in SKILL.md — `parent_weekly` is used in daily, `parent_monthly` in weekly, `parent_project` in monthly
+- **Dashboard Dataview queries** use `FROM ""` instead of `FROM "Reports"` and `string()` cast for week/year concatenation
+- **`.env.example`** added to repo; `.env` now includes `WEEK_END_DAY` and `LANGUAGE`
+- **`projects.config`** cleaned of user-specific paths
+- **README** rewritten: backfill section, placeholder table updated, clarified run directory, images side by side
+
+### Fixed
+- `examples/output/` wikilinks had `Reports/` prefix — corrected across all three example files
+- `monthly-example.md` parent pointed to Dashboard instead of project index — fixed
+- `IS_FRIDAY` hardcoded check replaced by `IS_WEEK_END` using configurable `WEEK_END_DAY`
+
+---
+
 ## [1.1.0] — 2026-03-15
 
 ### Added
