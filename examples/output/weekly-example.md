@@ -6,13 +6,13 @@ year: 2026
 month: 2026-03
 commits: 17
 status: success
+tags: [report/weekly, "project/MyApp"]
 ---
 
 ## Weekly Summary – MyApp – Week 11 / 2026
 
-### Summary
-
-Week 11 was a productive sprint with 17 commits across two contributors. Major achievements include completing the authentication system (JWT endpoints, token refresh, unit tests), improving API quality (rate limiting, CORS fixes, Swagger docs), and enhancing stability (null pointer fix, memory leak resolution, query optimizations). The CI pipeline was also updated to enforce full test coverage.
+> [!summary] Summary
+> Week 11 was a productive sprint with 17 commits across two contributors. Major achievements include completing the authentication system (JWT endpoints, token refresh, unit tests), improving API quality (rate limiting, CORS fixes, Swagger docs), and enhancing stability (null pointer fix, memory leak resolution, query optimizations). The CI pipeline was also updated to enforce full test coverage.
 
 ### Daily Reports
 

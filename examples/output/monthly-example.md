@@ -5,20 +5,19 @@ month: 2026-03
 year: 2026
 commits: 63
 status: success
+tags: [report/monthly, "project/MyApp"]
 ---
 
 ## Monthly Summary – MyApp – 2026-03
 
-### Summary
+> [!summary] Summary
+> March 2026 marked the completion of the v1.3.0 release cycle with 63 commits. The authentication system was fully implemented and tested. Performance improvements targeted SQL query optimization and connection pool tuning. Infrastructure work included CI pipeline upgrades, rate limiting, and memory leak fixes.
 
-March 2026 marked the completion of the v1.3.0 release cycle with 63 commits. The authentication system was fully implemented and tested. Performance improvements targeted SQL query optimization and connection pool tuning. Infrastructure work included CI pipeline upgrades, rate limiting, and memory leak fixes.
-
-### Highlights
-
-- **v1.3.0 shipped** — full JWT authentication, rate limiting, Swagger docs
-- **Performance**: SQL query optimizations reduced p99 latency by ~30%
-- **Quality**: test coverage increased from 61% to 78%
-- **Infrastructure**: CI pipeline now runs integration + unit tests on every PR
+> [!check] Highlights
+> - **v1.3.0 shipped** — full JWT authentication, rate limiting, Swagger docs
+> - **Performance**: SQL query optimizations reduced p99 latency by ~30%
+> - **Quality**: test coverage increased from 61% to 78%
+> - **Infrastructure**: CI pipeline now runs integration + unit tests on every PR
 
 ### Weekly Reports
 

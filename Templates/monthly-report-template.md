@@ -5,17 +5,16 @@ month: {{month}}
 year: {{year}}
 commits: {{nb_commits}}
 status: {{status}}
+tags: [report/monthly, "project/{{project}}"]
 ---
 
 ## Monthly Summary – {{project}} – {{month}}
 
-### Summary
+> [!summary] Summary
+> {{resume_taches}}
 
-{{resume_taches}}
-
-### Highlights
-
-{{highlights}}
+> [!check] Highlights
+> {{highlights}}
 
 ### Weekly Reports
 

@@ -6,13 +6,13 @@ year: {{year}}
 month: {{month}}
 commits: {{nb_commits}}
 status: {{status}}
+tags: [report/weekly, "project/{{project}}"]
 ---
 
 ## Weekly Summary – {{project}} – Week {{week}} / {{year}}
 
-### Summary
-
-{{resume_taches}}
+> [!summary] Summary
+> {{resume_taches}}
 
 ### Daily Reports
 

@@ -83,6 +83,11 @@ obsidian vault="VAULT" create path="Reports/Dashboard.md" content="<contents of 
 
 The dashboard uses Dataview queries that auto-refresh from report frontmatter — it never needs to be rewritten after creation.
 
+Then bookmark it:
+```bash
+obsidian vault="VAULT" bookmark path="Reports/Dashboard.md" title="Reports Dashboard"
+```
+
 ## Step 4 — Auto-catchup missing days this week
 
 Before processing today, check for missing daily reports earlier this week (from `WEEK_START` to `DATE - 1 day`). For each past day in that range:
@@ -161,8 +166,8 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{nb_commits}}` | commit count |
 | `{{status}}` | `success` |
 | `{{liste_commits}}` | formatted commit list or `_No commits._` |
-| `{{resume_taches}}` | 2-4 sentence prose summary in `$LANGUAGE` |
-| `{{highlights}}` | key themes/wins (monthly only) in `$LANGUAGE` |
+| `{{resume_taches}}` | 2-4 sentence prose summary in `$LANGUAGE` — **single line, no newlines** (rendered inside a `> [!summary]` callout) |
+| `{{highlights}}` | key themes/wins (monthly only) in `$LANGUAGE` — one bullet per line, each starting with `> - ` (rendered inside a `> [!check]` callout) |
 | `{{notes}}` | leave empty |
 | `{{daily_links}}` | wikilinks to daily reports (weekly/monthly only) |
 | `{{weekly_links}}` | wikilinks to weekly reports (monthly only) |
