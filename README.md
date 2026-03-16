@@ -78,6 +78,20 @@ If your project has weeks or months of Git history, you don't start from scratch
 
 The skill walks every day from the backfill date to today, skips days that already have a report, and auto-generates daily, weekly (Fridays), and monthly (last day of month) reports for each gap. Your vault goes from empty to fully populated in a single run.
 
+## Graph view
+
+Reports are linked via a `parent` field in their frontmatter, creating a visual tree in Obsidian's graph view:
+
+```
+Dashboard
+└── ProjectName          ← project index (larger node = more reports)
+    └── YYYY-MM          ← monthly report
+        └── WNN          ← weekly report
+            └── daily    ← daily reports
+```
+
+Nodes are color-coded by type (daily / weekly / monthly / project) and grouped by project. The graph config is pre-bundled in `graph.json` — copy it to your vault's `.obsidian/` folder to apply it instantly.
+
 ## Vault structure
 
 Reports are organized so you can navigate month → week → day:
