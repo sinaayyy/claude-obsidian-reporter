@@ -76,7 +76,7 @@ If your project has weeks or months of Git history, you don't start from scratch
 /report-orchestrator backfill=2025-11-01
 ```
 
-The skill walks every day from the backfill date to today, skips days that already have a report, and auto-generates daily, weekly (Fridays), and monthly (last day of month) reports for each gap. Your vault goes from empty to fully populated in a single run.
+Your vault goes from empty to fully populated in a single run.
 
 ## Graph view
 
@@ -90,7 +90,7 @@ Dashboard
             └── daily    ← daily reports
 ```
 
-Nodes are color-coded by type (daily / weekly / monthly / project) and grouped by project. The graph config is pre-bundled in `graph.json` — copy it to your vault's `.obsidian/` folder to apply it instantly.
+Nodes are color-coded by type (daily / weekly / monthly / project) and grouped by project. To apply the pre-configured colors and forces, copy `graph.json` (at the root of this repo) to your vault's `.obsidian/` folder.
 
 ## Vault structure
 
@@ -112,38 +112,12 @@ Reports/
 
 ## Customizing report templates
 
-Edit the files in `Templates/` to change the format of your reports:
+Edit the files in `Templates/` to change the format of your reports. Each template uses `{{placeholders}}` for project name, dates, commit list, AI summary, and graph hierarchy links — see the template files themselves for the full list.
 
-| File | Used for |
-|---|---|
-| `Templates/daily-report-template.md` | Every daily report |
-| `Templates/weekly-report-template.md` | Friday weekly reports |
-| `Templates/monthly-report-template.md` | End-of-month reports |
-
-Available placeholders:
-
-| Placeholder | Content |
-|---|---|
-| `{{project}}` | Project name |
-| `{{date}}` / `{{week}}` / `{{month}}` / `{{year}}` | Date fields |
-| `{{nb_commits}}` | Number of commits |
-| `{{liste_commits}}` | Formatted commit list |
-| `{{resume_taches}}` | AI-generated summary (respects `LANGUAGE`) |
-| `{{highlights}}` | Key wins/themes (monthly only) |
-| `{{daily_links}}` | Wikilinks to daily reports (weekly template) |
-| `{{weekly_links}}` | Wikilinks to weekly reports (monthly template) |
-| `{{parent_weekly}}` | Wikilink to the weekly report — used as `parent` in daily frontmatter |
-| `{{parent_monthly}}` | Wikilink to the monthly report — used as `parent` in weekly frontmatter |
-| `{{parent_project}}` | Wikilink to the project index — used as `parent` in monthly frontmatter |
-
-After editing a template, regenerate existing reports with the `backfill` parameter:
+After editing, re-run the skill for any date to regenerate:
 
 ```
-# Single day (reports are always overwritten on re-run)
 /report-orchestrator date=2026-03-18
-
-# Date range (via the shell wrapper — requires Claude Code installed and authenticated)
-bash scripts/catchup-missed-days.sh --from 2026-03-01 --to 2026-03-31 --force
 ```
 
 See [`examples/output/`](examples/output/) for what filled reports look like.
