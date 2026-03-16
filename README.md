@@ -134,17 +134,7 @@ See [`examples/output/`](examples/output/) for what filled reports look like.
 
 ## Cost
 
-Each run uses Claude to generate the AI summaries. Estimates based on Claude Sonnet pricing:
-
-| Run type | Estimated cost |
-|---|---|
-| Daily (1 project, ~5 commits/day) | ~$0.01 |
-| Daily + Weekly | ~$0.01–0.02 |
-| Daily + Monthly | ~$0.02–0.04 |
-| Each additional project | +~$0.005 |
-| `backfill=all` on a 6-month project | ~$0.50–1.00 |
-
-Cost scales with commit volume and number of projects. A team of 3 projects running daily for a month ≈ **$0.60–1.50/month**.
+Very low — the skill reads Git logs and writes Markdown files. Claude only generates short prose summaries from your commit history, making each run lightweight on tokens.
 
 ## Troubleshooting
 
