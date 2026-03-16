@@ -171,6 +171,8 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{notes}}` | leave empty |
 | `{{daily_links}}` | wikilinks to daily reports (weekly/monthly only) |
 | `{{weekly_links}}` | wikilinks to weekly reports (monthly only) |
+| `{{parent_weekly}}` | path to the weekly report parent — `Reports/PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY` |
+| `{{parent_monthly}}` | path to the monthly report parent — `Reports/PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
 
 **Daily** (always):
 

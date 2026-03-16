@@ -6,6 +6,7 @@ year: 2026
 commits: 63
 status: success
 tags: [report/monthly, "project/MyApp"]
+parent: "[[Reports/Dashboard]]"
 ---
 
 ## Monthly Summary – MyApp – 2026-03

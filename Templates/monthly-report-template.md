@@ -6,6 +6,7 @@ year: {{year}}
 commits: {{nb_commits}}
 status: {{status}}
 tags: [report/monthly, "project/{{project}}"]
+parent: "[[Reports/Dashboard]]"
 ---
 
 ## Monthly Summary – {{project}} – {{month}}

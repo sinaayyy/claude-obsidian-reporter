@@ -7,6 +7,7 @@ month: {{month}}
 commits: {{nb_commits}}
 status: {{status}}
 tags: [report/daily, "project/{{project}}"]
+parent: "[[{{parent_weekly}}]]"
 ---
 
 ## Daily Progress – {{project}} – {{date}}

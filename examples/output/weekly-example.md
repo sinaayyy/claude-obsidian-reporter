@@ -7,6 +7,7 @@ month: 2026-03
 commits: 17
 status: success
 tags: [report/weekly, "project/MyApp"]
+parent: "[[Reports/MyApp/2026-03/MyApp-2026-03]]"
 ---
 
 ## Weekly Summary – MyApp – Week 11 / 2026
