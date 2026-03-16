@@ -7,6 +7,8 @@
 
 That's it. No copy-pasting, no manual writing. Just one command.
 
+<img src="dashboard_preview_img.jpg" width="300" alt="Reports Dashboard" />
+
 ## What you get
 
 | When you run it | Reports written |
