@@ -13,6 +13,7 @@ You are the end-of-day report orchestrator. You run entirely within this Claude 
 ## Input (optional)
 - `date` — YYYY-MM-DD (defaults to today if not provided)
 - `language` — language for all generated text (defaults to `English`)
+- `backfill` — YYYY-MM-DD or `all` — if provided, generate all missing reports from that date up to `$DATE` before running the normal flow
 
 ## Vault structure
 
@@ -88,26 +89,39 @@ Then bookmark it:
 obsidian vault="VAULT" bookmark path="Reports/Dashboard.md" title="Reports Dashboard"
 ```
 
-## Step 4 — Auto-catchup missing days this week
+## Step 4 — Catchup missing days
 
-Before processing today, check for missing daily reports earlier this week (from `WEEK_START` to `DATE - 1 day`). For each past day in that range:
+### Determine catchup range
+
+- If `backfill` is **not provided** → catchup range = `WEEK_START` to `DATE - 1 day` (current week only)
+- If `backfill=YYYY-MM-DD` → catchup range = that date to `DATE - 1 day`
+- If `backfill=all` → get the earliest commit date across all projects, use that as start:
+```bash
+git -C <path> log --reverse --pretty=format:"%ad" --date=format:"%Y-%m-%d" | head -1
+```
+Take the earliest date across all projects as the catchup start.
+
+### Process each day in the range
 
 ```bash
-# Build list of past days this week
-current=$WEEK_START
+current=$CATCHUP_START
 while [[ "$current" < "$DATE" ]]; do
   echo "$current"
   current=$(date -d "$current + 1 day" +%Y-%m-%d 2>/dev/null || date -j -v+1d -f "%Y-%m-%d" "$current" +%Y-%m-%d)
 done
 ```
 
-For each past day and each project, check if the daily report already exists:
+For each day and each project, check if the daily report already exists:
 ```bash
 obsidian vault="VAULT" file path="Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-PAST_DATE.md"
 ```
 
-- If the file **exists** → skip (already reported)
-- If the file **does not exist** → generate the daily report for that day (same process as Step 4, daily only, no weekly/monthly)
+- If the file **exists** → skip
+- If the file **does not exist** → generate the daily report **and**:
+  - If that day is a **Friday** → also generate the weekly report for that week (if not already generated)
+  - If that day is the **last day of its month** → also generate the monthly report for that month (if not already generated)
+
+Also bootstrap the project index page if it doesn't exist yet (same logic as monthly step).
 
 List caught-up days in the final summary.
 
@@ -171,8 +185,16 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{notes}}` | leave empty |
 | `{{daily_links}}` | wikilinks to daily reports (weekly/monthly only) |
 | `{{weekly_links}}` | wikilinks to weekly reports (monthly only) |
-| `{{parent_weekly}}` | path to the weekly report parent — `Reports/PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY` |
-| `{{parent_monthly}}` | path to the monthly report parent — `Reports/PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
+| `{{parent_weekly}}` | wikilink path to the weekly's parent (the monthly) — `PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
+| `{{parent_monthly}}` | wikilink path to the monthly's parent (the project index) — `PROJECT/PROJECT` |
+| `{{parent_project}}` | wikilink path to the project index's parent — `Dashboard` |
+
+**Placeholder values to use:**
+
+| Placeholder | Value |
+|---|---|
+| `{{parent_weekly}}` | `PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
+| `{{parent_monthly}}` | `PROJECT/PROJECT` |
 
 **Daily** (always):
 
@@ -183,7 +205,7 @@ Paths:
 Commands:
 ```bash
 obsidian vault="VAULT" create path="Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE.md" content="..." overwrite
-obsidian vault="VAULT" create path="Reports/Current/PROJECT.md" content="[[Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE]]" overwrite
+obsidian vault="VAULT" create path="Reports/Current/PROJECT.md" content="[[PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE]]" overwrite
 ```
 
 **Weekly** (Fridays only):
@@ -192,7 +214,7 @@ Path: `Reports/PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY.md`
 
 For `{{daily_links}}`, generate one wikilink per day that had commits this week:
 ```
-- [[Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE|DATE]]
+- [[PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE|DATE]]
 ```
 
 Command:
@@ -202,16 +224,53 @@ obsidian vault="VAULT" create path="Reports/PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY
 
 **Monthly** (last day of month only):
 
+First write the monthly report:
+
 Path: `Reports/PROJECT/YYYY-MM/PROJECT-YYYY-MM.md`
 
 For `{{weekly_links}}`, generate one wikilink per week that had commits this month:
 ```
-- [[Reports/PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY|Week WNN]]
+- [[PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY|Week WNN]]
 ```
 
 Command:
 ```bash
 obsidian vault="VAULT" create path="Reports/PROJECT/YYYY-MM/PROJECT-YYYY-MM.md" content="..." overwrite
+```
+
+Then update (or create) the project index at `Reports/PROJECT/PROJECT.md`. Always overwrite it so it stays in sync — collect **all months** and **all weeks** ever generated for this project by reading existing report files:
+
+```bash
+# List all monthly reports for this project
+obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "PROJECT-[0-9]\{4\}-[0-9]\{2\}\.md"
+
+# List all weekly reports for this project
+obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "PROJECT-W[0-9]\{2\}-[0-9]\{4\}\.md"
+```
+
+Build the project index content with:
+- One `[[PROJECT/YYYY-MM/PROJECT-YYYY-MM|Month YYYY-MM]]` link per month found, sorted newest first
+- One `[[PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY|WNN]]` link per week found, sorted newest first
+
+```bash
+obsidian vault="VAULT" create path="Reports/PROJECT/PROJECT.md" content="---
+type: claude-project-index
+project: PROJECT
+tags: [\"project/PROJECT\"]
+parent: \"[[Dashboard]]\"
+---
+
+# PROJECT
+
+## Monthly Reports
+
+- [[PROJECT/YYYY-MM/PROJECT-YYYY-MM|YYYY-MM]]
+- ...
+
+## Weekly Reports
+
+- [[PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY|WNN]]
+- ..." overwrite
 ```
 
 ## Step 6 — Print summary

@@ -12,7 +12,7 @@ TABLE WITHOUT ID
   project as "Project",
   date as "Date",
   commits as "Commits"
-FROM "Reports"
+FROM ""
 WHERE type = "claude-daily-report"
 SORT date DESC
 LIMIT 14
@@ -24,11 +24,11 @@ LIMIT 14
 TABLE WITHOUT ID
   file.link as "Report",
   project as "Project",
-  "W" + week + " · " + year as "Period",
+  "W" + string(week) + " / " + string(year) as "Period",
   commits as "Commits"
-FROM "Reports"
+FROM ""
 WHERE type = "claude-weekly-report"
-SORT file.mtime DESC
+SORT year DESC, week DESC
 LIMIT 8
 ```
 
@@ -40,7 +40,7 @@ TABLE WITHOUT ID
   project as "Project",
   month as "Month",
   commits as "Commits"
-FROM "Reports"
+FROM ""
 WHERE type = "claude-monthly-report"
 SORT month DESC
 ```

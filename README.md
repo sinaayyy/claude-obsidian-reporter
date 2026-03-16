@@ -7,7 +7,7 @@
 
 That's it. No copy-pasting, no manual writing. Just one command.
 
-<img src="dashboard_preview_img.jpg" width="300" alt="Reports Dashboard" />
+<img src="dashboard_preview_img.jpg" height="200" alt="Reports Dashboard" /> <img src="graph_example.png" height="200" alt="Graph View" />
 
 ## What you get
 
@@ -16,8 +16,9 @@ That's it. No copy-pasting, no manual writing. Just one command.
 | Any day | Daily report |
 | Friday | Daily + Weekly summary |
 | Last day of month | Daily + Monthly summary |
+| First install on existing project | Run `backfill=all` or `backfill=YYYY-MM-DD` — generates everything from day one or from a chosen date |
 
-Forgot to run it yesterday? No problem — the skill **auto-detects missing days** from the current week and backfills them automatically.
+Forgot to run it yesterday? No problem — the skill **auto-detects missing days** from the current week and fills them automatically.
 
 ## Prerequisites
 
@@ -60,6 +61,20 @@ MyApp|/home/user/projects/my-app|
 ```
 
 Open Claude Code in your project directory and run the command. Reports appear in your vault instantly — no need to have Obsidian open.
+
+### Already have an existing project?
+
+If your project has weeks or months of Git history, you don't start from scratch — use `backfill` to generate all missing reports in one shot:
+
+```
+# Backfill from the very first commit
+/report-orchestrator backfill=all
+
+# Backfill from a chosen date
+/report-orchestrator backfill=2025-11-01
+```
+
+The skill walks every day from the backfill date to today, skips days that already have a report, and auto-generates daily, weekly (Fridays), and monthly (last day of month) reports for each gap. Your vault goes from empty to fully populated in a single run.
 
 ## Vault structure
 
@@ -113,6 +128,20 @@ bash scripts/catchup-missed-days.sh --from 2026-03-01 --to 2026-03-31 --force
 ```
 
 See [`examples/output/`](examples/output/) for what filled reports look like.
+
+## Cost
+
+Each run uses Claude to generate the AI summaries. Estimates based on Claude Sonnet pricing:
+
+| Run type | Estimated cost |
+|---|---|
+| Daily (1 project, ~5 commits/day) | ~$0.01 |
+| Daily + Weekly | ~$0.01–0.02 |
+| Daily + Monthly | ~$0.02–0.04 |
+| Each additional project | +~$0.005 |
+| `backfill=all` on a 6-month project | ~$0.50–1.00 |
+
+Cost scales with commit volume and number of projects. A team of 3 projects running daily for a month ≈ **$0.60–1.50/month**.
 
 ## Troubleshooting
 
