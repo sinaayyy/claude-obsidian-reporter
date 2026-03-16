@@ -1,11 +1,11 @@
 ---
 name: report-orchestrator
-description: End-of-day skill for Claude Code — generates daily, weekly, and monthly Git activity reports into your Obsidian vault. Auto-detects Fridays (weekly) and last day of month (monthly). Supports multiple languages.
+description: End-of-day skill for Claude Code — generates daily, weekly, and monthly Git activity reports into your Obsidian vault. Auto-detects end of week (weekly) and last day of month (monthly). Supports multiple languages.
 allowed-tools: Bash, Read
 ---
 
 # report-orchestrator
-<description>End-of-day report skill: generates daily report for all projects, plus weekly on Fridays and monthly on the last day of the month — all in one session.</description>
+<description>End-of-day report skill: generates daily report for all projects, plus weekly on the configured end-of-week day and monthly on the last day of the month — all in one session.</description>
 <instructions>
 
 You are the end-of-day report orchestrator. You run entirely within this Claude session — no subprocesses, no background tasks.
@@ -25,7 +25,7 @@ Reports/
     └── YYYY-MM/                                ← monthly folder
         ├── PROJECT-YYYY-MM.md                  ← monthly report (last day of month)
         └── WNN/                                ← weekly folder
-            ├── PROJECT-WNN-YYYY.md             ← weekly report (Fridays only)
+            ├── PROJECT-WNN-YYYY.md             ← weekly report (on WEEK_END_DAY)
             └── Daily/
                 ├── PROJECT-YYYY-MM-DD.md       ← Monday daily
                 ├── PROJECT-YYYY-MM-DD.md       ← Tuesday daily
@@ -52,17 +52,21 @@ Write all report content (section headings, summaries, highlights) in `$LANGUAGE
 ```bash
 DATE="${date:-$(date +%Y-%m-%d)}"
 
+# Read WEEK_END_DAY from .env (default: 5 = Friday)
+WEEK_END_DAY=$(grep -E "^WEEK_END_DAY=" .env 2>/dev/null | cut -d= -f2 | tr -d ' ')
+WEEK_END_DAY="${WEEK_END_DAY:-5}"
+
 DOW=$(date -d "$DATE" +%u 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%u)
 NEXT=$(date -d "$DATE + 1 day" +%Y-%m-%d 2>/dev/null || date -j -v+1d -f "%Y-%m-%d" "$DATE" +%Y-%m-%d)
 WEEK_NUM=$(date -d "$DATE" +%V 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%V)
 WEEK_START=$(date -d "$DATE - $(( DOW - 1 )) days" +%Y-%m-%d 2>/dev/null || date -j -v-$(( DOW - 1 ))d -f "%Y-%m-%d" "$DATE" +%Y-%m-%d)
 YEAR_MONTH=$(date -d "$DATE" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y-%m)
-IS_FRIDAY=$([ "$DOW" = "5" ] && echo true || echo false)
+IS_WEEK_END=$([ "$DOW" = "$WEEK_END_DAY" ] && echo true || echo false)
 IS_LAST_DAY=$([ "$(date -d "$DATE" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y-%m)" != "$(date -d "$NEXT" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$NEXT" +%Y-%m)" ] && echo true || echo false)
 ```
 
 Always run: **daily**
-If `IS_FRIDAY`: also run **weekly**
+If `IS_WEEK_END`: also run **weekly**
 If `IS_LAST_DAY`: also run **monthly**
 
 ## Step 3 — Load projects
@@ -118,7 +122,7 @@ obsidian vault="VAULT" file path="Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-PAST
 
 - If the file **exists** → skip
 - If the file **does not exist** → generate the daily report **and**:
-  - If that day is a **Friday** → also generate the weekly report for that week (if not already generated)
+  - If that day is the **week-end day** (matches WEEK_END_DAY) → also generate the weekly report for that week (if not already generated)
   - If that day is the **last day of its month** → also generate the monthly report for that month (if not already generated)
 
 Also bootstrap the project index page if it doesn't exist yet (same logic as monthly step).
@@ -209,7 +213,7 @@ obsidian vault="VAULT" create path="Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-DA
 obsidian vault="VAULT" create path="Reports/Current/PROJECT.md" content="[[PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE]]" overwrite
 ```
 
-**Weekly** (Fridays only):
+**Weekly** (WEEK_END_DAY only):
 
 Path: `Reports/PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY.md`
 
