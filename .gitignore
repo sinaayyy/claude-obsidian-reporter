@@ -8,3 +8,4 @@ projects.config
 
 # Contains GITHUB_TOKEN — never commit
 .env
+test-repos/
