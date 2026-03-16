@@ -7,7 +7,7 @@ month: 2026-03
 commits: 4
 status: success
 tags: [report/daily, "project/MyApp"]
-parent: "[[Reports/MyApp/2026-03/W11/MyApp-W11-2026]]"
+parent: "[[MyApp/2026-03/W11/MyApp-W11-2026]]"
 ---
 
 ## Daily Progress – MyApp – 2026-03-14

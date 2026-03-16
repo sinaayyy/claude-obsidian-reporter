@@ -60,7 +60,7 @@ MyApp|/home/user/projects/my-app|
 /report-orchestrator language=French          ← reports in French
 ```
 
-Open Claude Code in your project directory and run the command. Reports appear in your vault instantly — no need to have Obsidian open.
+Open Claude Code in the `claude-obsidian-reporter` directory (where `projects.config` lives) and run the command. Reports appear in your vault instantly — no need to have Obsidian open.
 
 ### Already have an existing project?
 
@@ -116,14 +116,17 @@ Available placeholders:
 | `{{highlights}}` | Key wins/themes (monthly only) |
 | `{{daily_links}}` | Wikilinks to daily reports (weekly template) |
 | `{{weekly_links}}` | Wikilinks to weekly reports (monthly template) |
+| `{{parent_weekly}}` | Wikilink to the weekly report — used as `parent` in daily frontmatter |
+| `{{parent_monthly}}` | Wikilink to the monthly report — used as `parent` in weekly frontmatter |
+| `{{parent_project}}` | Wikilink to the project index — used as `parent` in monthly frontmatter |
 
-After editing a template, regenerate existing reports:
+After editing a template, regenerate existing reports with the `backfill` parameter:
 
-```bash
-# Single day
+```
+# Single day (reports are always overwritten on re-run)
 /report-orchestrator date=2026-03-18
 
-# Date range
+# Date range (via the shell wrapper — requires Claude Code installed and authenticated)
 bash scripts/catchup-missed-days.sh --from 2026-03-01 --to 2026-03-31 --force
 ```
 

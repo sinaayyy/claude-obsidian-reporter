@@ -7,7 +7,7 @@ month: 2026-03
 commits: 17
 status: success
 tags: [report/weekly, "project/MyApp"]
-parent: "[[Reports/MyApp/2026-03/MyApp-2026-03]]"
+parent: "[[MyApp/2026-03/MyApp-2026-03]]"
 ---
 
 ## Weekly Summary – MyApp – Week 11 / 2026
@@ -17,11 +17,11 @@ parent: "[[Reports/MyApp/2026-03/MyApp-2026-03]]"
 
 ### Daily Reports
 
-- [[Reports/MyApp/2026-03/W11/Daily/MyApp-2026-03-10|2026-03-10]]
-- [[Reports/MyApp/2026-03/W11/Daily/MyApp-2026-03-11|2026-03-11]]
-- [[Reports/MyApp/2026-03/W11/Daily/MyApp-2026-03-12|2026-03-12]]
-- [[Reports/MyApp/2026-03/W11/Daily/MyApp-2026-03-13|2026-03-13]]
-- [[Reports/MyApp/2026-03/W11/Daily/MyApp-2026-03-14|2026-03-14]]
+- [[MyApp/2026-03/W11/Daily/MyApp-2026-03-10|2026-03-10]]
+- [[MyApp/2026-03/W11/Daily/MyApp-2026-03-11|2026-03-11]]
+- [[MyApp/2026-03/W11/Daily/MyApp-2026-03-12|2026-03-12]]
+- [[MyApp/2026-03/W11/Daily/MyApp-2026-03-13|2026-03-13]]
+- [[MyApp/2026-03/W11/Daily/MyApp-2026-03-14|2026-03-14]]
 
 ### Commits This Week
 

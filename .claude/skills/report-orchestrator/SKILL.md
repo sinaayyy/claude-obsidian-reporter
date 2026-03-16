@@ -183,18 +183,19 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{resume_taches}}` | 2-4 sentence prose summary in `$LANGUAGE` — **single line, no newlines** (rendered inside a `> [!summary]` callout) |
 | `{{highlights}}` | key themes/wins (monthly only) in `$LANGUAGE` — one bullet per line, each starting with `> - ` (rendered inside a `> [!check]` callout) |
 | `{{notes}}` | leave empty |
-| `{{daily_links}}` | wikilinks to daily reports (weekly/monthly only) |
-| `{{weekly_links}}` | wikilinks to weekly reports (monthly only) |
-| `{{parent_weekly}}` | wikilink path to the weekly's parent (the monthly) — `PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
-| `{{parent_monthly}}` | wikilink path to the monthly's parent (the project index) — `PROJECT/PROJECT` |
-| `{{parent_project}}` | wikilink path to the project index's parent — `Dashboard` |
+| `{{daily_links}}` | wikilinks to daily reports (weekly template only) |
+| `{{weekly_links}}` | wikilinks to weekly reports (monthly template only) |
+| `{{parent_weekly}}` | used as `parent` in the **daily** template — points to the weekly report — `PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY` |
+| `{{parent_monthly}}` | used as `parent` in the **weekly** template — points to the monthly report — `PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
+| `{{parent_project}}` | used as `parent` in the **monthly** template — points to the project index — `PROJECT/PROJECT` |
 
-**Placeholder values to use:**
+**Placeholder values to fill in (replace PROJECT, YYYY-MM, WNN with actual values):**
 
 | Placeholder | Value |
 |---|---|
-| `{{parent_weekly}}` | `PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
-| `{{parent_monthly}}` | `PROJECT/PROJECT` |
+| `{{parent_weekly}}` | `PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY` |
+| `{{parent_monthly}}` | `PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
+| `{{parent_project}}` | `PROJECT/PROJECT` |
 
 **Daily** (always):
 

@@ -6,7 +6,7 @@ year: 2026
 commits: 63
 status: success
 tags: [report/monthly, "project/MyApp"]
-parent: "[[Reports/Dashboard]]"
+parent: "[[MyApp/MyApp]]"
 ---
 
 ## Monthly Summary – MyApp – 2026-03
@@ -22,10 +22,10 @@ parent: "[[Reports/Dashboard]]"
 
 ### Weekly Reports
 
-- [[Reports/MyApp/2026-03/W10/MyApp-W10-2026|Week 10]]
-- [[Reports/MyApp/2026-03/W11/MyApp-W11-2026|Week 11]]
-- [[Reports/MyApp/2026-03/W12/MyApp-W12-2026|Week 12]]
-- [[Reports/MyApp/2026-03/W13/MyApp-W13-2026|Week 13]]
+- [[MyApp/2026-03/W10/MyApp-W10-2026|Week 10]]
+- [[MyApp/2026-03/W11/MyApp-W11-2026|Week 11]]
+- [[MyApp/2026-03/W12/MyApp-W12-2026|Week 12]]
+- [[MyApp/2026-03/W13/MyApp-W13-2026|Week 13]]
 
 ### Commits This Month
 
