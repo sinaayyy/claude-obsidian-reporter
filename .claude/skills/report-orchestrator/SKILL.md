@@ -1,6 +1,7 @@
 ---
 name: report-orchestrator
 description: End-of-day skill for Claude Code — generates daily, weekly, and monthly Git activity reports into your Obsidian vault. Auto-detects Fridays (weekly) and last day of month (monthly). Supports multiple languages.
+allowed-tools: Bash, Read
 ---
 
 # report-orchestrator
@@ -63,17 +64,34 @@ Always run: **daily**
 If `IS_FRIDAY`: also run **weekly**
 If `IS_LAST_DAY`: also run **monthly**
 
-## Step 2 — Load projects
+## Step 3 — Load projects
 
 Read `projects.config` (format: `ProjectName|/absolute/path|optional_git_url`, lines starting with `#` are comments).
 
-## Step 2b — Wake up Obsidian
+## Step 4 — Auto-catchup missing days this week
+
+Before processing today, check for missing daily reports earlier this week (from `WEEK_START` to `DATE - 1 day`). For each past day in that range:
 
 ```bash
-obsidian vault="VAULT" vault & sleep 5
+# Build list of past days this week
+current=$WEEK_START
+while [[ "$current" < "$DATE" ]]; do
+  echo "$current"
+  current=$(date -d "$current + 1 day" +%Y-%m-%d 2>/dev/null || date -j -v+1d -f "%Y-%m-%d" "$current" +%Y-%m-%d)
+done
 ```
 
-## Step 3 — For each project, run all required reports in sequence
+For each past day and each project, check if the daily report already exists:
+```bash
+obsidian vault="VAULT" file path="Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-PAST_DATE.md"
+```
+
+- If the file **exists** → skip (already reported)
+- If the file **does not exist** → generate the daily report for that day (same process as Step 4, daily only, no weekly/monthly)
+
+List caught-up days in the final summary.
+
+## Step 5 — For each project, run all required reports in sequence
 
 ### 3a. Sync repo
 ```bash
@@ -143,8 +161,7 @@ Paths:
 Commands:
 ```bash
 obsidian vault="VAULT" create path="Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE.md" content="..." overwrite
-obsidian vault="VAULT" create path="Reports/Current/PROJECT.md" content="..." overwrite
-obsidian vault="VAULT" daily:append content="- [[Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE|PROJECT – DATE]]"
+obsidian vault="VAULT" create path="Reports/Current/PROJECT.md" content="[[Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-DATE]]" overwrite
 ```
 
 **Weekly** (Fridays only):
@@ -175,7 +192,7 @@ Command:
 obsidian vault="VAULT" create path="Reports/PROJECT/YYYY-MM/PROJECT-YYYY-MM.md" content="..." overwrite
 ```
 
-## Step 4 — Print summary
+## Step 6 — Print summary
 
 ```
 ╔══════════════════════════════════════════════════╗
@@ -183,6 +200,7 @@ obsidian vault="VAULT" create path="Reports/PROJECT/YYYY-MM/PROJECT-YYYY-MM.md" 
 ╠══════════════════════════════════════════════════╣
 ║  Date   : YYYY-MM-DD  Week: WNN
 ║  Reports: daily [+ weekly] [+ monthly]
+║  Catchup : 2026-03-17 ✓  2026-03-18 ✓  (or "none")
 ╠══════════════════════════════════════════════════╣
 ║  PROJECT_A   daily ✓  weekly ✓
 ║  PROJECT_B   daily ✓

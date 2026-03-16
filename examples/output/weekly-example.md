@@ -10,7 +10,12 @@ status: success
 
 ## Weekly Summary – MyApp – Week 11 / 2026
 
+### Summary
+
+Week 11 was a productive sprint with 17 commits across two contributors. Major achievements include completing the authentication system (JWT endpoints, token refresh, unit tests), improving API quality (rate limiting, CORS fixes, Swagger docs), and enhancing stability (null pointer fix, memory leak resolution, query optimizations). The CI pipeline was also updated to enforce full test coverage.
+
 ### Daily Reports
+
 - [[Reports/MyApp/2026-03/W11/Daily/MyApp-2026-03-10|2026-03-10]]
 - [[Reports/MyApp/2026-03/W11/Daily/MyApp-2026-03-11|2026-03-11]]
 - [[Reports/MyApp/2026-03/W11/Daily/MyApp-2026-03-12|2026-03-12]]
@@ -36,7 +41,3 @@ status: success
 - Add integration tests for order workflow (o7f3b1d) — Alice Dev
 - Update CI pipeline to run all test suites (p2d5c9a) — Bob Engineer
 - Bump version to 1.3.0 (q8a1f4b) — Alice Dev
-
-### Summary
-
-Week 11 was a productive sprint with 17 commits across two contributors. Major achievements include completing the authentication system (JWT endpoints, token refresh, unit tests), improving API quality (rate limiting, CORS fixes, Swagger docs), and enhancing stability (null pointer fix, memory leak resolution, query optimizations). The CI pipeline was also updated to enforce full test coverage.

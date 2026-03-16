@@ -10,6 +10,10 @@ status: {{status}}
 
 ## Weekly Summary – {{project}} – Week {{week}} / {{year}}
 
+### Summary
+
+{{resume_taches}}
+
 ### Daily Reports
 
 {{daily_links}}
@@ -17,7 +21,3 @@ status: {{status}}
 ### Commits This Week
 
 {{liste_commits}}
-
-### Summary
-
-{{resume_taches}}

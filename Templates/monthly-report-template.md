@@ -9,6 +9,14 @@ status: {{status}}
 
 ## Monthly Summary – {{project}} – {{month}}
 
+### Summary
+
+{{resume_taches}}
+
+### Highlights
+
+{{highlights}}
+
 ### Weekly Reports
 
 {{weekly_links}}
@@ -16,11 +24,3 @@ status: {{status}}
 ### Commits This Month
 
 {{liste_commits}}
-
-### Highlights
-
-{{highlights}}
-
-### Summary
-
-{{resume_taches}}

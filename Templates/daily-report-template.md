@@ -10,8 +10,10 @@ status: {{status}}
 
 ## Daily Progress – {{project}} – {{date}}
 
-{{liste_commits}}
-
 ## Summary
 
 {{resume_taches}}
+
+## Commits
+
+{{liste_commits}}

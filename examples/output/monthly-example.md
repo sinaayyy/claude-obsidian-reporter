@@ -9,7 +9,19 @@ status: success
 
 ## Monthly Summary – MyApp – 2026-03
 
+### Summary
+
+March 2026 marked the completion of the v1.3.0 release cycle with 63 commits. The authentication system was fully implemented and tested. Performance improvements targeted SQL query optimization and connection pool tuning. Infrastructure work included CI pipeline upgrades, rate limiting, and memory leak fixes.
+
+### Highlights
+
+- **v1.3.0 shipped** — full JWT authentication, rate limiting, Swagger docs
+- **Performance**: SQL query optimizations reduced p99 latency by ~30%
+- **Quality**: test coverage increased from 61% to 78%
+- **Infrastructure**: CI pipeline now runs integration + unit tests on every PR
+
 ### Weekly Reports
+
 - [[Reports/MyApp/2026-03/W10/MyApp-W10-2026|Week 10]]
 - [[Reports/MyApp/2026-03/W11/MyApp-W11-2026|Week 11]]
 - [[Reports/MyApp/2026-03/W12/MyApp-W12-2026|Week 12]]
@@ -26,14 +38,3 @@ status: success
 - Fix memory leak in background job processor (n4e2a8c) — Bob Engineer
 - Bump version to 1.3.0 (q8a1f4b) — Alice Dev
 - _[… 55 more commits — see weekly reports for full breakdown]_
-
-### Highlights
-
-- **v1.3.0 shipped** — full JWT authentication, rate limiting, Swagger docs
-- **Performance**: SQL query optimizations reduced p99 latency by ~30%
-- **Quality**: test coverage increased from 61% to 78%
-- **Infrastructure**: CI pipeline now runs integration + unit tests on every PR
-
-### Summary
-
-March 2026 marked the completion of the v1.3.0 release cycle with 63 commits. The authentication system was fully implemented and tested. Performance improvements targeted SQL query optimization and connection pool tuning. Infrastructure work included CI pipeline upgrades, rate limiting, and memory leak fixes.
