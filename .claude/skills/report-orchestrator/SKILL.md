@@ -14,6 +14,7 @@ You are the end-of-day report orchestrator. You run entirely within this Claude 
 - `date` — YYYY-MM-DD (defaults to today if not provided)
 - `language` — language for all generated text (defaults to `English`)
 - `backfill` — YYYY-MM-DD or `all` — if provided, generate all missing reports from that date up to `$DATE` before running the normal flow
+- `tags` — comma-separated extra tags to add to all reports in this run (e.g. `tags=client/acme,sprint/42`)
 
 ## Vault structure
 
@@ -71,7 +72,9 @@ If `IS_LAST_DAY`: also run **monthly**
 
 ## Step 3 — Load projects
 
-Read `projects.config` (format: `ProjectName|/absolute/path|optional_git_url|optional_branches`, lines starting with `#` are comments).
+Read `projects.config` (format: `ProjectName|/absolute/path|optional_git_url|optional_branches|optional_tags`, lines starting with `#` are comments).
+
+- `optional_tags` — comma-separated tags specific to this project (e.g. `client/acme,team/backend`). Added to every report generated for this project.
 
 - `optional_branches` — comma-separated list of branches to include (e.g. `main,develop`). If omitted, defaults to `main,master,develop,dev` (only branches that actually exist in the repo are used).
 
@@ -89,6 +92,32 @@ done
 # If none exist, fall back to HEAD (unfiltered)
 [ -z "$BRANCH_ARGS" ] && BRANCH_ARGS="HEAD"
 ```
+
+## Step 3c — Build tags for each report
+
+For each project and each report type, build the `{{tags}}` value as a YAML inline array:
+
+1. **Base tags** — always included:
+   - Daily: `report/daily`, `project/PROJECT`
+   - Weekly: `report/weekly`, `project/PROJECT`
+   - Monthly: `report/monthly`, `project/PROJECT`
+
+2. **Project tags** — from the 5th column of `projects.config` (comma-separated). Include all of them.
+
+3. **Run-level tags** — from the `tags` input parameter (comma-separated). Applied to all projects in this run.
+
+Merge all three, deduplicate, then format as a YAML inline array. Tags containing `/` must be quoted:
+
+```
+# Example: base=[report/daily, project/MyApp]  project_tags=[client/acme]  run_tags=[sprint/42]
+# Result:
+tags: [report/daily, "project/MyApp", "client/acme", "sprint/42"]
+
+# No extra tags:
+tags: [report/daily, "project/MyApp"]
+```
+
+Rule: quote any tag that contains `/` or special characters. Plain alphanumeric tags can be unquoted.
 
 ## Step 3b — Bootstrap dashboard (first run only)
 
@@ -196,6 +225,7 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | Placeholder | Value |
 |---|---|
 | `{{project}}` | project name |
+| `{{tags}}` | full YAML inline array of tags — base + project tags + run tags (see Step 3c) |
 | `{{date}}` | YYYY-MM-DD |
 | `{{week}}` | ISO week number (e.g. 12) |
 | `{{month}}` | YYYY-MM |

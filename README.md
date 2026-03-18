@@ -50,16 +50,20 @@ LANGUAGE=English                # optional — any language: French, Spanish, Ja
 Finally, add your projects to `projects.config`:
 
 ```
-# ProjectName | /absolute/path/to/repo | optional_git_url
+# ProjectName | /absolute/path/to/repo | optional_git_url | optional_branches | optional_tags
 MyApp|/home/user/projects/my-app|
+ClientX|/home/user/projects/client-x||main|client/acme,team/backend
 ```
+
+The `optional_tags` column lets you attach permanent tags to a project — they'll be included in every report generated for it (see [Custom tags](#custom-tags)).
 
 ## Usage
 
 ```
-/report-orchestrator                          ← today
-/report-orchestrator date=2026-03-14          ← specific date
-/report-orchestrator language=French          ← reports in French
+/report-orchestrator                                      ← today
+/report-orchestrator date=2026-03-14                      ← specific date
+/report-orchestrator language=French                      ← reports in French
+/report-orchestrator tags=sprint/42,client/acme           ← add tags to all reports today
 ```
 
 Open Claude Code in the `claude-obsidian-reporter` directory (where `projects.config` lives) and run the command. Reports appear in your vault instantly — no need to have Obsidian open.
@@ -77,6 +81,31 @@ If your project has weeks or months of Git history, you don't start from scratch
 ```
 
 Your vault goes from empty to fully populated in a single run.
+
+## Custom tags
+
+Every report always includes two base tags: `report/<type>` and `project/<name>`. You can add your own on top via two mechanisms:
+
+**Per-project** (permanent, in `projects.config`):
+```
+# 5th column = tags applied to every report for this project
+ClientX|/home/user/projects/client-x||main|client/acme,team/backend
+```
+
+**Per-run** (one-off, passed directly):
+```
+/report-orchestrator tags=sprint/42,urgent
+```
+
+Both sources are merged with the base tags and deduplicated. The resulting YAML frontmatter looks like:
+```yaml
+tags: [report/daily, "project/ClientX", "client/acme", "team/backend", "sprint/42"]
+```
+
+Tags then drive filtering in Obsidian's search, Dataview queries, and graph view coloring. To add a custom color for your tags in the graph, open `.obsidian/graph.json` and add an entry to `colorGroups`:
+```json
+{ "query": "tag:#client/acme", "color": { "a": 1, "rgb": 16711935 } }
+```
 
 ## Graph view
 

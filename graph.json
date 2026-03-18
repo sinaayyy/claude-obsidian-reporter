@@ -1,0 +1,43 @@
+{
+  "collapse": {
+    "existing": false,
+    "orphans": false,
+    "attachments": true,
+    "tags": false
+  },
+  "colorGroups": [
+    {
+      "query": "tag:#report/daily",
+      "color": { "a": 1, "rgb": 4491519 }
+    },
+    {
+      "query": "tag:#report/weekly",
+      "color": { "a": 1, "rgb": 16750592 }
+    },
+    {
+      "query": "tag:#report/monthly",
+      "color": { "a": 1, "rgb": 16732754 }
+    },
+    {
+      "query": "tag:#project",
+      "color": { "a": 1, "rgb": 6732650 }
+    }
+  ],
+  "display": {
+    "linkThickness": 1.2,
+    "nodeSize": 1.3,
+    "textFadeMultiplier": -1,
+    "linksColor": { "a": 0.4, "rgb": 8947848 }
+  },
+  "forces": {
+    "centerStrength": 0.518713248970312,
+    "linkDistance": 40,
+    "linkStrength": 1,
+    "repelStrength": 14
+  },
+  "search": "",
+  "showArrow": false,
+  "localBacklinks": false,
+  "localInterlinks": false,
+  "localJumps": 1
+}

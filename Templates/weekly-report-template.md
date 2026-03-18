@@ -6,7 +6,7 @@ year: {{year}}
 month: {{month}}
 commits: {{nb_commits}}
 status: {{status}}
-tags: [report/weekly, "project/{{project}}"]
+tags: {{tags}}
 parent: "[[{{parent_monthly}}]]"
 ---
 
