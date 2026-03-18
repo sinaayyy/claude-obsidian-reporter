@@ -1,11 +1,15 @@
-# Format: ProjectName|/absolute/local/path|git_url
+# Format: ProjectName|/absolute/local/path|git_url|branches
 #
 # git_url column is optional:
 #   - Leave empty      → local repo only (must already be cloned)
 #   - https:// URL     → public repo, or private with GITHUB_TOKEN in .env
 #   - git@github.com   → private repo via SSH (key must be loaded)
 #
-LocalOnly|/home/user/projects/local-project|
-PublicRepo|/home/user/projects/public|https://github.com/octocat/Hello-World
-PrivateHTTPS|/home/user/projects/private|https://github.com/user/private-repo
-PrivateSSH|/home/user/projects/ssh-project|git@github.com:user/private-repo.git
+# branches column is optional:
+#   - Leave empty      → defaults to main,master,develop,dev (uses whichever exist)
+#   - Comma-separated  → only those branches are included in reports
+#
+LocalOnly|/home/user/projects/local-project||
+PublicRepo|/home/user/projects/public|https://github.com/octocat/Hello-World|
+PrivateHTTPS|/home/user/projects/private|https://github.com/user/private-repo|main,develop
+PrivateSSH|/home/user/projects/ssh-project|git@github.com:user/private-repo.git|main

@@ -1,4 +1,3 @@
-# Published at https://github.com/sinaayyy/claude-obsidian-reporter — PRs welcome — contribute to the awesome list
 ---
 name: report-orchestrator
 description: End-of-day skill for Claude Code — generates daily, weekly, and monthly Git activity reports into your Obsidian vault. Auto-detects end of week (weekly) and last day of month (monthly). Supports multiple languages.
@@ -72,7 +71,24 @@ If `IS_LAST_DAY`: also run **monthly**
 
 ## Step 3 — Load projects
 
-Read `projects.config` (format: `ProjectName|/absolute/path|optional_git_url`, lines starting with `#` are comments).
+Read `projects.config` (format: `ProjectName|/absolute/path|optional_git_url|optional_branches`, lines starting with `#` are comments).
+
+- `optional_branches` — comma-separated list of branches to include (e.g. `main,develop`). If omitted, defaults to `main,master,develop,dev` (only branches that actually exist in the repo are used).
+
+**Resolve branches for a project:**
+```bash
+# Get configured branches (or defaults)
+CONFIGURED="${branches:-main,master,develop,dev}"
+
+# Keep only branches that exist in the repo
+BRANCH_ARGS=""
+for b in $(echo "$CONFIGURED" | tr ',' ' '); do
+  git -C "$path" rev-parse --verify "$b" &>/dev/null && BRANCH_ARGS="$BRANCH_ARGS $b"
+done
+
+# If none exist, fall back to HEAD (unfiltered)
+[ -z "$BRANCH_ARGS" ] && BRANCH_ARGS="HEAD"
+```
 
 ## Step 3b — Bootstrap dashboard (first run only)
 
@@ -138,23 +154,25 @@ git clone <url> <path>   # if git_url present and not yet cloned
 git -C <path> pull       # otherwise
 ```
 
+Resolve `$BRANCH_ARGS` for this project as described in Step 3 before extracting git log.
+
 ### 3b. Extract git log
 
 **Daily** — commits on `$DATE`:
 ```bash
-git -C "$path" log --after="${DATE}T00:00:00" --before="${DATE}T23:59:59" \
+git -C "$path" log $BRANCH_ARGS --after="${DATE}T00:00:00" --before="${DATE}T23:59:59" \
   --pretty=format:"- %s (%h) — %an" --no-merges
 ```
 
 **Weekly** — commits from `$WEEK_START` to `$DATE`:
 ```bash
-git -C "$path" log --after="${WEEK_START}T00:00:00" --before="${DATE}T23:59:59" \
+git -C "$path" log $BRANCH_ARGS --after="${WEEK_START}T00:00:00" --before="${DATE}T23:59:59" \
   --pretty=format:"- %s (%h) — %an" --no-merges
 ```
 
 **Monthly** — commits from first day of month to `$DATE`:
 ```bash
-git -C "$path" log --after="${YEAR_MONTH}-01T00:00:00" --before="${DATE}T23:59:59" \
+git -C "$path" log $BRANCH_ARGS --after="${YEAR_MONTH}-01T00:00:00" --before="${DATE}T23:59:59" \
   --pretty=format:"- %s (%h) — %an" --no-merges
 ```
 
