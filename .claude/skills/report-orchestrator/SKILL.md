@@ -312,6 +312,28 @@ parent: \"[[Dashboard]]\"
 ╚══════════════════════════════════════════════════╝
 ```
 
+## Progress logging
+
+Print a short status line before each major action so the user can follow along. Keep it to one line, no markdown, no verbose detail.
+
+Examples:
+```
+[step 1] date=2026-03-18  language=English
+[step 2] daily ✓  weekly ✗  monthly ✗
+[step 3] loaded 3 projects
+[catchup] 2026-03-11 → 2026-03-17  (7 days to check)
+[catchup] 2026-03-11 ProjectAlpha — skipped (exists)
+[catchup] 2026-03-12 ProjectAlpha — generating...
+[catchup] 2026-03-12 ProjectAlpha — done (3 commits)
+[ProjectAlpha] branches: main develop
+[ProjectAlpha] daily — 4 commits → writing...
+[ProjectAlpha] daily ✓
+[ProjectAlpha] weekly — 12 commits → writing...
+[ProjectAlpha] weekly ✓
+```
+
+Print these lines as you go — do not buffer and print all at the end.
+
 ## Rules
 - Run everything in THIS session — no background processes, no spawning new claude sessions
 - NEVER write files directly (`echo >`, `tee`, `cat >`)
