@@ -24,7 +24,7 @@ Forgot to run it yesterday? No problem — the skill **auto-detects missing days
 
 ## Prerequisites
 
-- [Obsidian](https://obsidian.md) with the **Obsidian CLI** community plugin enabled
+- [Obsidian](https://obsidian.md) with the **Obsidian CLI** community plugin enabled — your vault must have been opened in Obsidian at least once so the CLI can find it by name
 - [Claude Code](https://claude.ai/claude-code) installed and authenticated
 - Git 2.x+
 - [Dataview](https://github.com/blacksmithgu/obsidian-dataview) plugin (optional — required for the auto-generated dashboard)
@@ -142,6 +142,9 @@ chmod +x ~/bin/obsidian
 
 **`VAULT_NAME is not set`**
 → Open `.env` and set `VAULT_NAME` to the vault folder name shown in Obsidian's title bar.
+
+**`Vault not found`**
+→ The Obsidian CLI only recognizes vaults that have been opened in Obsidian at least once. Open Obsidian → "Open folder as vault" → select your vault folder. After that the CLI will find it by name.
 
 **`ERROR: '$PROJECT_PATH' is not a git repository`**
 → The path doesn't exist or was never cloned. Add a `git_url` to auto-clone, or clone manually first.
