@@ -23,6 +23,14 @@ What makes it different: reports are a **bottom-up AI synthesis**. Each level re
 
 All levels are written on every run and kept up to date. Missed a day? The skill auto-detects and fills gaps from the current week. Starting on an existing project? `backfill=all` populates everything from the first commit.
 
+## How it works
+
+- **Only reads commit messages.** No source files, no diffs. Fast and privacy-friendly.
+- **Synthesizes at every level.** Claude writes fresh prose for each report type, with abstraction that scales: specific tasks for daily, themes for weekly, strategy for monthly, narrative for yearly.
+- **Writes directly into Obsidian** via the CLI plugin. No intermediate files, no copy-paste.
+- **Runs entirely inside your Claude Code session.** No background processes, no subshells spawned.
+- **Vault structure mirrors the time hierarchy.** `Y-YYYY/M-MM/W-NN/D-DD.md` with `parent` links between levels, so Obsidian's graph view builds the tree automatically.
+
 ## Prerequisites
 
 - [Obsidian](https://obsidian.md) with the **Obsidian CLI** community plugin enabled — your vault must have been opened in Obsidian at least once so the CLI can find it by name
