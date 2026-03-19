@@ -5,38 +5,38 @@
 [![Obsidian](https://img.shields.io/badge/Obsidian-plugin-7C3AED?logo=obsidian&logoColor=white)](https://obsidian.md)
 [![GitHub Stars](https://img.shields.io/github/stars/sinaayyy/claude-obsidian-reporter?style=social)](https://github.com/sinaayyy/claude-obsidian-reporter)
 
-Type `/report-orchestrator` at the end of your day. Claude reads your Git commits and writes structured reports directly into your Obsidian vault — no copy-pasting, no manual writing.
+Type `/report-orchestrator` at the end of your day. Claude reads your Git commits and writes structured reports directly into your Obsidian vault. No copy-pasting, no manual writing.
 
-What makes it different: reports are a **bottom-up AI synthesis**. Each level re-reads the raw commits and writes fresh prose at the right altitude — from today's specific tasks up to the full story of the project.
+What makes it different: reports are a **bottom-up AI synthesis**. Each level re-reads the raw commits and writes fresh prose at the right altitude, from today's specific tasks up to the full story of the project.
 
 <img src="docs/dashboard_preview_img.jpg" height="200" alt="Reports Dashboard" /> <img src="docs/graph_example.png" height="200" alt="Graph View" />
 
 ## What you get
 
-| Level | Scope | Summary style |
-|---|---|---|
-| Daily | Today | Specific tasks and changes |
-| Weekly | Week to date | Patterns and progress themes |
-| Monthly | Month to date | Strategic view of the month |
-| Yearly | Year to date | High-level narrative and trajectory |
-| Project index | All time | Full story + stats (first commit, total commits, contributors) |
+| Level | Scope | Tone | Subject |
+|---|---|---|---|
+| Daily | Today | Terse, first-person: what moved, what's blocked | *I* |
+| Weekly | Week to date | Team-level: tasks compressed into outcomes | *the team* |
+| Monthly | Month to date | Data-grounded: delivery vs. plan, risks surfacing | *the workstream* |
+| Yearly | Year to date | Narrative: thematic, acknowledges difficulty | *the project* |
+| Project index | All time | Essay: what this project is and what it built | *the project* |
 
 All levels are written on every run and kept up to date. Missed a day? The skill auto-detects and fills gaps from the current week. Starting on an existing project? `backfill=all` populates everything from the first commit.
 
 ## How it works
 
-- **Only reads commit messages.** No source files, no diffs. If most messages are uninformative (`wip`, `fix`, `...`), falls back to reading changed file names only — never file contents.
-- **Synthesizes at every level.** Claude writes fresh prose for each report type, with abstraction that scales: specific tasks for daily, themes for weekly, strategy for monthly, narrative for yearly.
+- **Only reads commit messages.** No source files, no diffs. If most messages are uninformative (`wip`, `fix`, `...`), falls back to reading changed file names only. Never file contents.
+- **Synthesizes at every level.** Claude calibrates its writing to the level: terse task log for daily, team outcome summary for weekly, delivery health for monthly, thematic narrative for yearly. Each one the right register for its audience.
 - **Writes directly into Obsidian** via the CLI plugin. No intermediate files, no copy-paste.
 - **Runs entirely inside your Claude Code session.** No background processes, no subshells spawned.
 - **Vault structure mirrors the time hierarchy.** `Y-YYYY/M-MM/W-NN/D-DD.md` with `parent` links between levels, so Obsidian's graph view builds the tree automatically.
 
 ## Prerequisites
 
-- [Obsidian](https://obsidian.md) with the **Obsidian CLI** community plugin enabled — your vault must have been opened in Obsidian at least once so the CLI can find it by name
+- [Obsidian](https://obsidian.md) with the **Obsidian CLI** community plugin enabled (your vault must have been opened in Obsidian at least once so the CLI can find it by name)
 - [Claude Code](https://claude.ai/claude-code) installed and authenticated
 - Git 2.x+
-- [Dataview](https://github.com/blacksmithgu/obsidian-dataview) plugin (optional — required for the auto-generated dashboard)
+- [Dataview](https://github.com/blacksmithgu/obsidian-dataview) plugin (optional, required for the auto-generated dashboard)
 
 ## Install
 
@@ -53,7 +53,7 @@ Then open `.env` and fill in:
 ```bash
 VAULT_NAME=MyNotes              # folder name shown in Obsidian's title bar
 VAULT_PATH=/home/user/MyNotes   # absolute path to your vault
-LANGUAGE=English                # optional — any language: French, Spanish, Japanese...
+LANGUAGE=English                # optional, any language: French, Spanish, Japanese...
 ```
 
 Finally, add your projects to `projects.config`:
@@ -64,7 +64,7 @@ MyApp|/home/user/projects/my-app|
 ClientX|/home/user/projects/client-x||main|client/acme,team/backend
 ```
 
-The `optional_tags` column lets you attach permanent tags to a project — they'll be included in every report generated for it (see [Custom tags](#custom-tags)).
+The `optional_tags` column lets you attach permanent tags to a project; they'll be included in every report generated for it (see [Custom tags](#custom-tags)).
 
 ## Usage
 
@@ -73,13 +73,15 @@ The `optional_tags` column lets you attach permanent tags to a project — they'
 /report-orchestrator date=2026-03-14                      ← specific date
 /report-orchestrator language=French                      ← reports in French
 /report-orchestrator tags=sprint/42,client/acme           ← add tags to all reports today
+/report-orchestrator check                                ← audit vault structure only
+/report-orchestrator fix                                  ← audit + auto-fix all issues
 ```
 
-Open Claude Code in the `claude-obsidian-reporter` directory (where `projects.config` lives) and run the command. Reports appear in your vault instantly — no need to have Obsidian open.
+Open Claude Code in the `claude-obsidian-reporter` directory (where `projects.config` lives) and run the command. Reports appear in your vault instantly. No need to have Obsidian open.
 
 ### Already have an existing project?
 
-If your project has weeks or months of Git history, you don't start from scratch — use `backfill` to generate all missing reports in one shot:
+If your project has weeks or months of Git history, you don't start from scratch. Use `backfill` to generate all missing reports in one shot:
 
 ```
 # Backfill from the very first commit
@@ -121,38 +123,38 @@ Tags then drive filtering in Obsidian's search, Dataview queries, and graph view
 Reports are linked via a `parent` field in their frontmatter, creating a visual tree in Obsidian's graph view:
 
 ```
-Dashboard
-└── ProjectName          ← project index (larger node = more reports)
-    └── YYYY-MM          ← monthly report
-        └── WNN          ← weekly report
-            └── daily    ← daily reports
+Working (Dashboard)
+└── ProjectName              ← project index
+    └── Y-2026               ← yearly report
+        └── M-03             ← monthly report
+            └── W-1          ← weekly report
+                └── D-19     ← daily report
 ```
 
-Nodes are color-coded by type (daily / weekly / monthly / yearly / project) and grouped by project. To apply the pre-configured colors and forces, copy `graph.json` (at the root of this repo) to your vault's `.obsidian/` folder.
+Nodes are color-coded by type (daily / weekly / monthly / yearly / project). To apply the pre-configured colors and forces, copy `graph.json` (at the root of this repo) to your vault's `.obsidian/` folder.
 
-> **Note:** Color groups are evaluated top-down in Obsidian — the first matching rule wins. `graph.json` puts report-type colors (daily, weekly, monthly, yearly) first so they take precedence. The `project` rule is last and only applies to the project index node, which has no report-type tag.
+> **Note:** Color groups are evaluated top-down in Obsidian (first match wins). `graph.json` puts report-type colors first so they take precedence. The `project` rule is last and only applies to the project index node.
 
 ## Vault structure
-
-Reports are organized so you can navigate month → week → day:
 
 ```
 Reports/
 ├── Current/
-│   └── ProjectName.md              ← link to today's daily (always up to date)
+│   └── ProjectName.md         ← link to today's daily (always up to date)
 └── ProjectName/
-    └── YYYY-MM/
-        ├── ProjectName-YYYY-MM.md  ← monthly report
-        └── WNN/
-            ├── ProjectName-WNN-YYYY.md   ← weekly report
-            └── Daily/
-                ├── ProjectName-YYYY-MM-DD.md
-                └── ...
+    ├── ProjectName.md         ← project index (all time)
+    └── Y-2026/
+        ├── Y-2026.md          ← yearly report
+        └── M-03/
+            ├── M-03.md        ← monthly report
+            └── W-1/
+                ├── W-1.md     ← weekly report
+                └── D-19.md    ← daily report
 ```
 
 ## Customizing report templates
 
-Edit the files in `Templates/` to change the format of your reports. Each template uses `{{placeholders}}` for project name, dates, commit list, AI summary, and graph hierarchy links — see the template files themselves for the full list.
+Edit the files in `Templates/` to change the format of your reports. Each template uses `{{placeholders}}` for project name, dates, commit list, AI summary, and graph hierarchy links. See the template files themselves for the full list.
 
 After editing, re-run the skill for any date to regenerate:
 
@@ -171,18 +173,18 @@ bash scripts/check-vault.sh
 ```
 
 It validates the entire vault structure against the expected hierarchy for each project:
-- **Phantom folders** — a `W-N/` or `M-MM/` folder with no aggregate report inside
-- **Cross-hierarchy links** — a daily pointing to the wrong week, a week to the wrong month, etc.
-- **Broken parents** — `parent` wikilink pointing to a file that doesn't exist
-- **Broken `Current/` pointers** — today's shortcut pointing to a deleted or renamed daily
-- **Zero-commit reports** — reports that should never have been written
-- **Wrong or missing tags** — `report/daily`, `report/weekly`, etc. missing from frontmatter, which breaks graph node coloring
+- **Phantom folders**: a `W-N/` or `M-MM/` folder with no aggregate report inside
+- **Cross-hierarchy links**: a daily pointing to the wrong week, a week to the wrong month, etc.
+- **Broken parents**: `parent` wikilink pointing to a file that doesn't exist
+- **Broken `Current/` pointers**: today's shortcut pointing to a deleted or renamed daily
+- **Zero-commit reports**: reports that should never have been written
+- **Wrong or missing tags**: `report/daily`, `report/weekly`, etc. missing from frontmatter, which breaks graph node coloring
 
 Exits with code `1` if any errors are found, `0` if clean.
 
 ## Cost
 
-Very low — the skill reads Git logs and writes Markdown files. Claude only generates short prose summaries from your commit history, making each run lightweight on tokens.
+Very low. The skill reads Git logs and writes Markdown files. Claude only generates short prose summaries from your commit history, making each run lightweight on tokens.
 
 ## Troubleshooting
 
