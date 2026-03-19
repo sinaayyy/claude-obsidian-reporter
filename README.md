@@ -77,6 +77,7 @@ The `optional_tags` column lets you attach permanent tags to a project; they'll 
 /report-orchestrator fix                                  ← audit + auto-fix all issues
 /report-orchestrator add-project name=X path=/repo       ← add a project to projects.config
 /report-orchestrator remove-project name=X               ← remove a project (with optional vault cleanup)
+/report-orchestrator discover                             ← find local git repos not yet tracked
 ```
 
 Open Claude Code in the `claude-obsidian-reporter` directory (where `projects.config` lives) and run the command. Reports appear in your vault instantly. No need to have Obsidian open.
@@ -95,7 +96,7 @@ Add a project to the reporting:
 # Remote repo, not yet cloned (will clone on first run)
 /report-orchestrator add-project name=ApiService path=/repos/api url=https://github.com/org/api
 
-# Remote-only — no local clone needed
+# Remote-only (no local clone needed)
 /report-orchestrator add-project name=OssLib url=https://github.com/org/lib
 ```
 
@@ -115,6 +116,22 @@ Remove a project:
 ```
 
 The skill asks for confirmation, then offers to delete the project's vault files (`Reports/MyApp/` and `Reports/Current/MyApp.md`). If you decline, the files stay in the vault as orphaned nodes.
+
+### Discovering local repos
+
+```
+/report-orchestrator discover
+```
+
+Scans the directories listed in `DISCOVER_PATHS` (see `.env`) for git repositories not yet in `projects.config`. Results are shown as a numbered list with the last commit date and commit count for each repo. You can then add any of them with `/report-orchestrator add-project`.
+
+Set `DISCOVER_PATHS` in `.env` to control where to look (colon-separated, max depth 4):
+
+```bash
+DISCOVER_PATHS=/home/user/projects:/home/user/work
+```
+
+Default: `~/projects:~/repos:~/code:~/workspace:~/dev`.
 
 ### Already have an existing project?
 

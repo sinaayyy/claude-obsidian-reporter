@@ -19,8 +19,9 @@ You are the end-of-day report orchestrator. You run entirely within this Claude 
 - `fix`: run audit then auto-fix all detected issues: see [Fix mode](#fix-mode)
 - `add-project`: add a project to `projects.config`: see [Add-project mode](#add-project-mode)
 - `remove-project`: remove a project from `projects.config`: see [Remove-project mode](#remove-project-mode)
+- `discover`: scan local directories for git repos not yet in `projects.config`: see [Discover mode](#discover-mode)
 
-If any of `check`, `fix`, `add-project`, `remove-project` is present, **skip the normal report flow entirely** and jump to the corresponding mode.
+If any of `check`, `fix`, `add-project`, `remove-project`, `discover` is present, **skip the normal report flow entirely** and jump to the corresponding mode.
 
 ## Vault structure
 
@@ -533,6 +534,72 @@ Rewrite `Reports/Current/PROJECT.md` to point to it.
 The folder exists with daily/weekly files inside but the aggregate report is missing. Regenerate it using the same logic as the normal report flow: read the git log for the relevant period, generate prose, write the file via obsidian CLI. Apply the exact same templates and placeholders as the normal run.
 
 After all fixes are applied, re-run `bash scripts/check-vault.sh` and print the final result.
+
+---
+
+## Discover mode
+
+Triggered by `/report-orchestrator discover`.
+
+Scans local directories for git repositories that are not yet tracked in `projects.config`, then offers to add them interactively.
+
+### 1. Resolve scan paths
+
+Read `DISCOVER_PATHS` from `.env`. If not set, use defaults:
+
+```bash
+DISCOVER_PATHS=$(grep -E "^DISCOVER_PATHS=" .env 2>/dev/null | cut -d= -f2 | tr -d ' ')
+DISCOVER_PATHS="${DISCOVER_PATHS:-$HOME/projects:$HOME/repos:$HOME/code:$HOME/workspace:$HOME/dev}"
+```
+
+### 2. Find git repositories
+
+For each path in `DISCOVER_PATHS` (colon-separated), search recursively up to depth 4 for `.git` directories:
+
+```bash
+find "$scan_dir" -maxdepth 4 -name ".git" -type d 2>/dev/null | sed 's|/.git$||'
+```
+
+Exclude:
+- The `claude-obsidian-reporting` directory itself (where this tool lives)
+- Any path inside `.cache/` (bare clones managed by this tool)
+- Paths already in `projects.config` (compare by resolved absolute path)
+- Submodules (a `.git` file, not a `.git` directory, indicates a submodule — skip it)
+
+### 3. Collect already-tracked paths
+
+Read `projects.config` and extract the path column (2nd field). Resolve to absolute paths for comparison.
+
+### 4. Present results
+
+Print a numbered list of untracked repos found:
+
+```
+Discovered 5 untracked git repositories:
+
+  1. /home/user/projects/my-app          (last commit: 2026-03-18, 142 commits)
+  2. /home/user/projects/client-x        (last commit: 2026-02-28, 67 commits)
+  3. /home/user/repos/side-project       (last commit: 2025-11-01, 23 commits)
+  4. /home/user/code/scripts             (last commit: 2026-01-10, 8 commits)
+  5. /home/user/dev/experiments/proto    (last commit: 2024-06-15, 3 commits)
+
+Enter numbers to add (e.g. 1 3 5), "all", or "none":
+```
+
+For each repo, gather metadata with:
+```bash
+git -C "$repo" log --oneline | wc -l          # commit count
+git -C "$repo" log -1 --format="%ad" --date=format:"%Y-%m-%d"  # last commit date
+```
+
+### 5. Add selected repos
+
+For each selected repo:
+- Derive a project name from the directory name (capitalize first letter, replace hyphens with spaces if desired — but keep the original folder name by default)
+- Detect the default branch: `git -C "$repo" symbolic-ref --short HEAD`
+- Add to `projects.config` using the same logic as [Add-project mode](#add-project-mode)
+
+Print a summary of what was added.
 
 ---
 
