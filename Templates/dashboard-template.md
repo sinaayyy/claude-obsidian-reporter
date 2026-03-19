@@ -24,7 +24,7 @@ LIMIT 14
 TABLE WITHOUT ID
   file.link as "Report",
   project as "Project",
-  "W" + string(week) + " / " + string(year) as "Period",
+  "W" + string(week) + " – " + month as "Period",
   commits as "Commits"
 FROM ""
 WHERE type = "claude-weekly-report"

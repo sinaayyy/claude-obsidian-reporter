@@ -28,7 +28,7 @@ Reports/
         └── M-MM/                     ← monthly folder
             ├── M-MM.md          ← monthly report (node shows "M-03" in graph)
             └── W-NN/                 ← weekly folder
-                ├── W-NN.md      ← weekly report (node shows "W-12" in graph)
+                ├── W-NN.md      ← weekly report (node shows "W-1" to "W-5" in graph)
                 └── D-DD.md           ← daily report (no project prefix needed)
 ```
 
@@ -58,12 +58,12 @@ WEEK_END_DAY="${WEEK_END_DAY:-5}"
 
 DOW=$(date -d "$DATE" +%u 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%u)
 NEXT=$(date -d "$DATE + 1 day" +%Y-%m-%d 2>/dev/null || date -j -v+1d -f "%Y-%m-%d" "$DATE" +%Y-%m-%d)
-WEEK_NUM=$(date -d "$DATE" +%V 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%V)
 WEEK_START=$(date -d "$DATE - $(( DOW - 1 )) days" +%Y-%m-%d 2>/dev/null || date -j -v-$(( DOW - 1 ))d -f "%Y-%m-%d" "$DATE" +%Y-%m-%d)
 YEAR_MONTH=$(date -d "$DATE" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y-%m)
 YEAR=$(date -d "$DATE" +%Y 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y)
 MONTH=$(date -d "$DATE" +%m 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%m)
 DAY=$(date -d "$DATE" +%d 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%d)
+WEEK_NUM=$(( (10#$DAY - 1) / 7 + 1 ))   # week within the month: 1–5
 IS_WEEK_END=$([ "$DOW" = "$WEEK_END_DAY" ] && echo true || echo false)
 IS_LAST_DAY=$([ "$(date -d "$DATE" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y-%m)" != "$(date -d "$NEXT" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$NEXT" +%Y-%m)" ] && echo true || echo false)
 IS_LAST_YEAR=$([ "$(date -d "$DATE" +%Y 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y)" != "$(date -d "$NEXT" +%Y 2>/dev/null || date -j -f "%Y-%m-%d" "$NEXT" +%Y)" ] && echo true || echo false)
