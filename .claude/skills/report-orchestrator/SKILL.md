@@ -166,7 +166,20 @@ For each day and each project, check if the daily report already exists:
 obsidian vault="VAULT" file path="Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-PAST_DATE.md"
 ```
 
-- If the file **exists** → skip
+If the file **exists**, check whether it is stale by comparing the actual commit count with the value stored in the report frontmatter:
+```bash
+# Actual commits for that day
+ACTUAL=$(git -C "$path" log $BRANCH_ARGS \
+  --after="${PAST_DATE}T00:00:00" --before="${PAST_DATE}T23:59:59" \
+  --pretty=format:"%h" --no-merges | wc -l | tr -d ' ')
+
+# Commits recorded in the existing report (read the file then grep nb_commits)
+RECORDED=$(obsidian vault="VAULT" read path="Reports/PROJECT/YYYY-MM/WNN/Daily/PROJECT-PAST_DATE.md" \
+  | grep -E "^nb_commits:" | awk '{print $2}')
+```
+
+- If `ACTUAL == RECORDED` → skip (report is up to date)
+- If `ACTUAL != RECORDED` → regenerate (new commits were added after the report was written)
 - If the file **does not exist** → generate the daily report **and**:
   - If that day is the **week-end day** (matches WEEK_END_DAY) → also generate the weekly report for that week (if not already generated)
   - If that day is the **last day of its month** → also generate the monthly report for that month (if not already generated)
