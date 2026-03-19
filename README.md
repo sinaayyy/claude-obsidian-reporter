@@ -5,29 +5,23 @@
 [![Obsidian](https://img.shields.io/badge/Obsidian-plugin-7C3AED?logo=obsidian&logoColor=white)](https://obsidian.md)
 [![GitHub Stars](https://img.shields.io/github/stars/sinaayyy/claude-obsidian-reporter?style=social)](https://github.com/sinaayyy/claude-obsidian-reporter)
 
-> Type `/report-orchestrator` at the end of your day. Claude reads your Git commits, writes a structured report, and saves it directly into your Obsidian vault.
+Type `/report-orchestrator` at the end of your day. Claude reads your Git commits and writes structured reports directly into your Obsidian vault — no copy-pasting, no manual writing.
 
-That's it. No copy-pasting, no manual writing. Just one command.
-
-Every report is a **bottom-up AI synthesis**: daily summaries describe what you did today, weekly summaries synthesize the week's themes, monthly summaries give a strategic view of the month, yearly summaries narrate the year's trajectory, and the project index captures the full story across all years — each level re-reading the raw commits and writing fresh prose at the right altitude.
+What makes it different: reports are a **bottom-up AI synthesis**. Each level re-reads the raw commits and writes fresh prose at the right altitude — from today's specific tasks up to the full story of the project.
 
 <img src="docs/dashboard_preview_img.jpg" height="200" alt="Reports Dashboard" /> <img src="docs/graph_example.png" height="200" alt="Graph View" />
 
 ## What you get
 
-Every run generates **all four report levels** — each overwritten with the latest period-to-date commits:
-
 | Level | Scope | Summary style |
 |---|---|---|
-| Daily | Today's commits | Specific tasks and changes |
+| Daily | Today | Specific tasks and changes |
 | Weekly | Week to date | Patterns and progress themes |
 | Monthly | Month to date | Strategic view of the month |
 | Yearly | Year to date | High-level narrative and trajectory |
 | Project index | All time | Full story + stats (first commit, total commits, contributors) |
 
-First install on an existing project? Run `backfill=all` or `backfill=YYYY-MM-DD` — generates everything from day one or from a chosen date.
-
-Forgot to run it yesterday? No problem — the skill **auto-detects missing days** from the current week and fills them automatically.
+All levels are written on every run and kept up to date. Missed a day? The skill auto-detects and fills gaps from the current week. Starting on an existing project? `backfill=all` populates everything from the first commit.
 
 ## Prerequisites
 
