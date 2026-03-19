@@ -231,7 +231,7 @@ git -C "$path" log $BRANCH_ARGS --after="${YEAR}-01-01T00:00:00" --before="${DAT
   --pretty=format:"- %s (%h) — %an" --no-merges
 ```
 
-If 0 commits: `liste_commits = "_No commits._"`, `status = success`.
+If 0 commits: **skip writing the report entirely** — do not create the file. A note with no commits would appear as a detached node in the graph.
 
 ### 3c. Write reports to Obsidian
 
@@ -259,7 +259,7 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{year}}` | YYYY |
 | `{{nb_commits}}` | commit count |
 | `{{status}}` | `success` |
-| `{{liste_commits}}` | formatted commit list or `_No commits._` |
+| `{{liste_commits}}` | formatted commit list (never empty — reports with 0 commits are not written) |
 | `{{resume_taches}}` | 2-4 sentence prose summary in `$LANGUAGE` — **single line, no newlines** (rendered inside a `> [!summary]` callout) |
 | `{{highlights}}` | key themes/wins (monthly and yearly) in `$LANGUAGE` — one bullet per line, each starting with `> - ` (rendered inside a `> [!check]` callout) |
 | `{{notes}}` | leave empty |
@@ -422,6 +422,6 @@ Print these lines as you go — do not buffer and print all at the end.
 - `vault=` must be the first argument on every obsidian command
 - `overwrite` is a flag without `--`
 - Terminal must NOT run as administrator
-- If a project has no commits for a period, still write the note with `_No commits._`
+- If a project has no commits for a period, **do not write the report** — skip it silently to avoid detached nodes in the graph
 
 </instructions>
