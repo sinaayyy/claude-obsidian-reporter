@@ -271,8 +271,8 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{nb_commits}}` | commit count |
 | `{{status}}` | `success` |
 | `{{liste_commits}}` | formatted commit list (never empty — reports with 0 commits are not written) |
-| `{{resume_taches}}` | prose summary in `$LANGUAGE` — **single line, no newlines** (rendered inside a `> [!summary]` callout) — abstraction level scales with the report type: **daily** = what was done today (2-3 sentences, specific tasks); **weekly** = patterns and progress across the week (2-3 sentences, themes not individual commits); **monthly** = synthesis of the month's major achievements and direction (3-4 sentences, strategic view); **yearly** = executive summary of the year's output and trajectory (3-5 sentences, high-level narrative) |
-| `{{highlights}}` | key themes/wins in `$LANGUAGE` — one bullet per line, each starting with `> - ` (rendered inside a `> [!check]` callout) — used in monthly and yearly only: **monthly**: 3-5 major milestones or themes; **yearly**: 5-7 significant achievements or shifts |
+| `{{resume_taches}}` | prose summary in `$LANGUAGE` — **single line, no newlines** (rendered inside a `> [!summary]` callout) — tone and abstraction scale strictly with level: **daily** = terse, first-person, task movement ("shipped X", "investigating Y", "blocked on Z") — 2-3 sentences, subject is *I*; **weekly** = professional, team-level framing, individual tasks compressed into outcomes ("the team delivered X", "carried over Y due to Z") — 2-3 sentences, subject is *the team*; **monthly** = measured, data-grounded, outcome vs. plan framing, trends and risks surfacing ("delivery was on track / behind, tech debt in area X is accumulating") — 3-4 sentences, subject is *the workstream*; **yearly** = narrative and reflective, thematic not chronological, acknowledges difficulty alongside wins ("the year was defined by X, we built Y, we learned Z") — 3-5 sentences, subject is *the project* |
+| `{{highlights}}` | key items in `$LANGUAGE` — one bullet per line, each starting with `> - ` (rendered inside a `> [!check]` callout) — used in weekly, monthly, and yearly: **weekly** = 2-3 concrete deliverables or unblocked blockers; **monthly** = 3-5 delivery milestones, risk items, or tech debt flags — include red signals openly, not just wins; **yearly** = 5-7 thematic achievements or shifts — compress projects into named outcomes with one-sentence impact |
 | `{{notes}}` | leave empty |
 | `{{first_commit}}` | earliest commit date across all time (YYYY-MM-DD) — project index only |
 | `{{total_commits}}` | total commit count across all time — project index only |
@@ -385,8 +385,8 @@ Load `Templates/project-index-template.md` and fill in all placeholders:
 | `{{total_commits}}` | total commit count across all time |
 | `{{active_years}}` | comma-separated list of years with commits (e.g. `2024, 2025, 2026`) |
 | `{{contributors}}` | comma-separated list of distinct author names |
-| `{{resume_taches}}` | 3-4 sentence narrative describing what this project is and what it has accomplished overall, inferred from commit history — **single line, no newlines** |
-| `{{highlights}}` | 5-8 key milestones or turning points across the project's entire lifetime — one bullet per line, each starting with `> - ` |
+| `{{resume_taches}}` | essay-style narrative in `$LANGUAGE` describing what this project is and what it has built over its lifetime — tone is reflective and human, written as if onboarding a future team member ("this project started as X, grew into Y, its core purpose is Z") — **single line, no newlines**, 3-5 sentences, subject is *the project* |
+| `{{highlights}}` | 5-8 named milestones or turning points across the project's entire lifetime — one bullet per line, each starting with `> - ` — compress each to a one-sentence outcome with impact ("shipped auth rewrite — reduced login errors by 80%", "migrated to monorepo — unified 3 repos into one") |
 | `{{yearly_links}}` | one `- [[PROJECT/Y-YYYY/Y-YYYY\|Y-YYYY]]` per year found, newest first |
 
 ```bash
