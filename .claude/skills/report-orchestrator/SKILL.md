@@ -231,7 +231,12 @@ git -C "$path" log $BRANCH_ARGS --after="${YEAR}-01-01T00:00:00" --before="${DAT
   --pretty=format:"- %s (%h) — %an" --no-merges
 ```
 
-If 0 commits: **skip writing the report entirely** — do not create the file. A note with no commits would appear as a detached node in the graph.
+This rule applies to **all report types** — if 0 commits for the period, **skip writing the report entirely**. Do not create the file. A note with no commits would appear as a detached node in the graph.
+
+- Daily with 0 commits → no file
+- Weekly with 0 commits across the whole week → no file
+- Monthly with 0 commits across the whole month → no file
+- Yearly with 0 commits across the whole year → no file
 
 ### 3c. Write reports to Obsidian
 
