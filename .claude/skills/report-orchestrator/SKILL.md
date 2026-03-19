@@ -273,7 +273,8 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{monthly_links}}` | wikilinks to monthly reports (yearly template only) |
 | `{{parent_weekly}}` | used as `parent` in the **daily** template — points to the weekly report — `PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY` |
 | `{{parent_monthly}}` | used as `parent` in the **weekly** template — points to the monthly report — `PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
-| `{{parent_project}}` | used as `parent` in the **monthly** and **yearly** templates — points to the project index — `PROJECT/PROJECT` |
+| `{{parent_yearly}}` | used as `parent` in the **monthly** template — points to the yearly report — `PROJECT/PROJECT-YYYY` |
+| `{{parent_project}}` | used as `parent` in the **yearly** template — points to the project index — `PROJECT/PROJECT` |
 
 **Placeholder values to fill in (replace PROJECT, YYYY-MM, WNN, YYYY with actual values):**
 
@@ -281,6 +282,7 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 |---|---|
 | `{{parent_weekly}}` | `PROJECT/YYYY-MM/WNN/PROJECT-WNN-YYYY` |
 | `{{parent_monthly}}` | `PROJECT/YYYY-MM/PROJECT-YYYY-MM` |
+| `{{parent_yearly}}` | `PROJECT/PROJECT-YYYY` |
 | `{{parent_project}}` | `PROJECT/PROJECT` |
 
 **Daily** (always):
