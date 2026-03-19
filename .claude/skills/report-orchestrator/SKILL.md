@@ -261,8 +261,8 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{nb_commits}}` | commit count |
 | `{{status}}` | `success` |
 | `{{liste_commits}}` | formatted commit list (never empty — reports with 0 commits are not written) |
-| `{{resume_taches}}` | 2-4 sentence prose summary in `$LANGUAGE` — **single line, no newlines** (rendered inside a `> [!summary]` callout) |
-| `{{highlights}}` | key themes/wins (monthly and yearly) in `$LANGUAGE` — one bullet per line, each starting with `> - ` (rendered inside a `> [!check]` callout) |
+| `{{resume_taches}}` | prose summary in `$LANGUAGE` — **single line, no newlines** (rendered inside a `> [!summary]` callout) — abstraction level scales with the report type: **daily** = what was done today (2-3 sentences, specific tasks); **weekly** = patterns and progress across the week (2-3 sentences, themes not individual commits); **monthly** = synthesis of the month's major achievements and direction (3-4 sentences, strategic view); **yearly** = executive summary of the year's output and trajectory (3-5 sentences, high-level narrative) |
+| `{{highlights}}` | key themes/wins in `$LANGUAGE` — one bullet per line, each starting with `> - ` (rendered inside a `> [!check]` callout) — used in monthly and yearly only: **monthly**: 3-5 major milestones or themes; **yearly**: 5-7 significant achievements or shifts |
 | `{{notes}}` | leave empty |
 | `{{daily_links}}` | wikilinks to daily reports (weekly template only) |
 | `{{weekly_links}}` | wikilinks to weekly reports (monthly template only) |
