@@ -5,7 +5,7 @@ allowed-tools: Bash, Read
 ---
 
 # report-orchestrator
-<description>End-of-day report skill: generates daily, weekly, monthly, and yearly reports on every run (all overwritten with period-to-date commits). Structure: PROJECT/Y-YYYY/M-MM/W-NN/ with summary.md at each level and D-DD.md for daily.</description>
+<description>End-of-day report skill: generates daily, weekly, monthly, and yearly reports on every run (all overwritten with period-to-date commits). Structure: PROJECT/Y-YYYY/Y-YYYY.md, M-MM/M-MM.md, W-NN/W-NN.md, D-DD.md for daily.</description>
 <instructions>
 
 You are the end-of-day report orchestrator. You run entirely within this Claude session — no subprocesses, no background tasks.
@@ -24,19 +24,19 @@ Reports/
 │   └── PROJECT.md                    ← today's daily (overwritten on every run)
 └── PROJECT/
     └── Y-YYYY/                       ← yearly folder
-        ├── summary.md         ← yearly report
+        ├── Y-YYYY.md          ← yearly report (node shows "Y-2026" in graph)
         └── M-MM/                     ← monthly folder
-            ├── summary.md       ← monthly report
+            ├── M-MM.md          ← monthly report (node shows "M-03" in graph)
             └── W-NN/                 ← weekly folder
-                ├── summary.md   ← weekly report
+                ├── W-NN.md      ← weekly report (node shows "W-12" in graph)
                 └── D-DD.md           ← daily report (no project prefix needed)
 ```
 
 Examples:
 - `Reports/Current/ProjectAlpha.md`
-- `Reports/ProjectAlpha/Y-2026/summary.md`
-- `Reports/ProjectAlpha/Y-2026/M-03/summary.md`
-- `Reports/ProjectAlpha/Y-2026/M-03/W-12/summary.md`
+- `Reports/ProjectAlpha/Y-2026/Y-2026.md`
+- `Reports/ProjectAlpha/Y-2026/M-03/M-03.md`
+- `Reports/ProjectAlpha/Y-2026/M-03/W-12/W-12.md`
 - `Reports/ProjectAlpha/Y-2026/M-03/W-12/D-18.md`
 
 ## Step 1 — Resolve language and date
@@ -267,18 +267,18 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{daily_links}}` | wikilinks to daily reports (weekly template only) |
 | `{{weekly_links}}` | wikilinks to weekly reports (monthly template only) |
 | `{{monthly_links}}` | wikilinks to monthly reports (yearly template only) |
-| `{{parent_weekly}}` | used as `parent` in the **daily** template — points to the weekly summary — `PROJECT/Y-YYYY/M-MM/W-NN/summary` |
-| `{{parent_monthly}}` | used as `parent` in the **weekly** template — points to the monthly summary — `PROJECT/Y-YYYY/M-MM/summary` |
-| `{{parent_yearly}}` | used as `parent` in the **monthly** template — points to the yearly summary — `PROJECT/Y-YYYY/summary` |
+| `{{parent_weekly}}` | used as `parent` in the **daily** template — points to the weekly summary — `PROJECT/Y-YYYY/M-MM/W-NN/W-NN` |
+| `{{parent_monthly}}` | used as `parent` in the **weekly** template — points to the monthly summary — `PROJECT/Y-YYYY/M-MM/M-MM` |
+| `{{parent_yearly}}` | used as `parent` in the **monthly** template — points to the yearly summary — `PROJECT/Y-YYYY/Y-YYYY` |
 | `{{parent_project}}` | used as `parent` in the **yearly** template — points to the project index — `PROJECT/PROJECT` |
 
 **Placeholder values to fill in (replace PROJECT, Y-YYYY, M-MM, W-NN with actual values):**
 
 | Placeholder | Value |
 |---|---|
-| `{{parent_weekly}}` | `PROJECT/Y-YYYY/M-MM/W-NN/summary` |
-| `{{parent_monthly}}` | `PROJECT/Y-YYYY/M-MM/summary` |
-| `{{parent_yearly}}` | `PROJECT/Y-YYYY/summary` |
+| `{{parent_weekly}}` | `PROJECT/Y-YYYY/M-MM/W-NN/W-NN` |
+| `{{parent_monthly}}` | `PROJECT/Y-YYYY/M-MM/M-MM` |
+| `{{parent_yearly}}` | `PROJECT/Y-YYYY/Y-YYYY` |
 | `{{parent_project}}` | `PROJECT/PROJECT` |
 
 **Daily** (always):
@@ -295,7 +295,7 @@ obsidian vault="VAULT" create path="Reports/Current/PROJECT.md" content="[[PROJE
 
 **Weekly** (always — overwritten every run with week-to-date commits):
 
-Path: `Reports/PROJECT/Y-YYYY/M-MM/W-NN/summary.md`
+Path: `Reports/PROJECT/Y-YYYY/M-MM/W-NN/W-NN.md`
 
 For `{{daily_links}}`, generate one wikilink per day that had commits this week:
 ```
@@ -304,48 +304,48 @@ For `{{daily_links}}`, generate one wikilink per day that had commits this week:
 
 Command:
 ```bash
-obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/M-MM/W-NN/summary.md" content="..." overwrite
+obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/M-MM/W-NN/W-NN.md" content="..." overwrite
 ```
 
 **Monthly** (always — overwritten every run with month-to-date commits):
 
 First write the monthly report:
 
-Path: `Reports/PROJECT/Y-YYYY/M-MM/summary.md`
+Path: `Reports/PROJECT/Y-YYYY/M-MM/M-MM.md`
 
 For `{{weekly_links}}`, generate one wikilink per week that had commits this month:
 ```
-- [[PROJECT/Y-YYYY/M-MM/W-NN/summary|Week W-NN]]
+- [[PROJECT/Y-YYYY/M-MM/W-NN/W-NN|Week W-NN]]
 ```
 
 Command:
 ```bash
-obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/M-MM/summary.md" content="..." overwrite
+obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/M-MM/M-MM.md" content="..." overwrite
 ```
 
 **Yearly** (always — overwritten every run with year-to-date commits):
 
-Path: `Reports/PROJECT/Y-YYYY/summary.md`
+Path: `Reports/PROJECT/Y-YYYY/Y-YYYY.md`
 
 For `{{monthly_links}}`, generate one wikilink per month that had commits this year:
 ```
-- [[PROJECT/Y-YYYY/M-MM/summary|Month M-MM]]
+- [[PROJECT/Y-YYYY/M-MM/M-MM|Month M-MM]]
 ```
 
 Command:
 ```bash
-obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/summary.md" content="..." overwrite
+obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/Y-YYYY.md" content="..." overwrite
 ```
 
 Then update (or create) the project index at `Reports/PROJECT/PROJECT.md`. Always overwrite it so it stays in sync — list all yearly folders:
 
 ```bash
 # List all yearly folders for this project
-obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "Y-[0-9]\{4\}/summary\.md"
+obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "Y-[0-9]\{4\}/Y-[0-9]\{4\}\.md"
 ```
 
 Build the project index content with:
-- One `[[PROJECT/Y-YYYY/summary|Y-YYYY]]` link per year found, sorted newest first
+- One `[[PROJECT/Y-YYYY/Y-YYYY|Y-YYYY]]` link per year found, sorted newest first
 
 ```bash
 obsidian vault="VAULT" create path="Reports/PROJECT/PROJECT.md" content="---
@@ -359,7 +359,7 @@ parent: \"[[Dashboard]]\"
 
 ## Yearly Reports
 
-- [[PROJECT/Y-YYYY/summary|Y-YYYY]]
+- [[PROJECT/Y-YYYY/Y-YYYY|Y-YYYY]]
 - ..." overwrite
 ```
 
