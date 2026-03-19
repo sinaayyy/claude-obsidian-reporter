@@ -194,10 +194,19 @@ List caught-up days in the final summary.
 ## Step 5: For each project, run all required reports in sequence
 
 ### 3a. Sync repo
+
 ```bash
-git clone <url> <path>   # if git_url present and not yet cloned
-git -C <path> pull       # otherwise
+# 1. If git_url is set and path does not exist yet: clone
+git clone <url> <path>
+
+# 2. If path exists and has a remote: pull
+HAS_REMOTE=$(git -C "$path" remote 2>/dev/null | head -1)
+[ -n "$HAS_REMOTE" ] && git -C "$path" pull
+
+# 3. If path exists and has no remote: skip sync silently (local-only repo)
 ```
+
+Local repos without a remote are fully supported — the skill reads the git log directly without pulling.
 
 Resolve `$BRANCH_ARGS` for this project as described in Step 3 before extracting git log.
 
@@ -531,7 +540,9 @@ Steps:
 ```bash
 git -C "$path" rev-parse --is-inside-work-tree 2>/dev/null
 ```
-If the path does not exist and no `url` was provided, print an error and stop. If a `url` was provided, note that the repo will be cloned on the first run.
+- Path exists and is a git repo: OK — remote is optional, local-only repos are supported.
+- Path does not exist and `url` provided: OK — will be cloned on first run.
+- Path does not exist and no `url`: print an error and stop.
 
 3. **Append to projects.config**: add the new line in the correct format:
 ```

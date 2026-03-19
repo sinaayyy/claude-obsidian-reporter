@@ -90,7 +90,10 @@ Add a project to the reporting:
 /report-orchestrator add-project name=ClientX path=/repos/client url=https://github.com/org/client branches=main tags=client/acme,team/backend
 ```
 
-The skill checks for duplicates and validates that the path is a git repository before writing. If a `url` is provided and the path does not exist yet, the repo will be cloned automatically on the first run.
+The skill checks for duplicates and validates the path before writing. `url` is optional:
+- **Local repo, no remote**: just provide `path`. No cloning or pulling — the skill reads the git log directly.
+- **Remote repo, already cloned**: provide `path`. The skill will `git pull` on each run.
+- **Remote repo, not yet cloned**: provide both `path` and `url`. The repo will be cloned automatically on the first run.
 
 Remove a project:
 
