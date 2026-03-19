@@ -264,6 +264,10 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{resume_taches}}` | prose summary in `$LANGUAGE` — **single line, no newlines** (rendered inside a `> [!summary]` callout) — abstraction level scales with the report type: **daily** = what was done today (2-3 sentences, specific tasks); **weekly** = patterns and progress across the week (2-3 sentences, themes not individual commits); **monthly** = synthesis of the month's major achievements and direction (3-4 sentences, strategic view); **yearly** = executive summary of the year's output and trajectory (3-5 sentences, high-level narrative) |
 | `{{highlights}}` | key themes/wins in `$LANGUAGE` — one bullet per line, each starting with `> - ` (rendered inside a `> [!check]` callout) — used in monthly and yearly only: **monthly**: 3-5 major milestones or themes; **yearly**: 5-7 significant achievements or shifts |
 | `{{notes}}` | leave empty |
+| `{{first_commit}}` | earliest commit date across all time (YYYY-MM-DD) — project index only |
+| `{{total_commits}}` | total commit count across all time — project index only |
+| `{{active_years}}` | comma-separated years with at least one commit — project index only |
+| `{{contributors}}` | comma-separated distinct author names — project index only |
 | `{{daily_links}}` | wikilinks to daily reports (weekly template only) |
 | `{{weekly_links}}` | wikilinks to weekly reports (monthly template only) |
 | `{{monthly_links}}` | wikilinks to monthly reports (yearly template only) |
@@ -339,26 +343,44 @@ obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/Y-YYYY.md" content=".
 
 **Project index** (always — unconditional, run for every project regardless of commit activity):
 
-After all report writes, always update `Reports/PROJECT/PROJECT.md`. Scan the vault for existing yearly report files then build one link per year, newest first:
+After all report writes, always update `Reports/PROJECT/PROJECT.md`. First extract project-level stats from git:
+
+```bash
+# First commit date
+FIRST_COMMIT=$(git -C "$path" log $BRANCH_ARGS --reverse --pretty=format:"%ad" --date=format:"%Y-%m-%d" | head -1)
+
+# Total commit count across all time
+TOTAL_COMMITS=$(git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%h" | wc -l | tr -d ' ')
+
+# Active years (distinct years with at least one commit)
+ACTIVE_YEARS=$(git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%ad" --date=format:"%Y" | sort -u | tr '\n' ',' | sed 's/,$//')
+
+# Contributors (distinct author names)
+CONTRIBUTORS=$(git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%an" | sort -u | tr '\n' ',' | sed 's/,$//')
+```
+
+Then scan the vault for existing yearly report files and build one link per year, newest first:
 
 ```bash
 obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "Y-[0-9]\{4\}/Y-[0-9]\{4\}\.md"
 ```
 
+Load `Templates/project-index-template.md` and fill in all placeholders:
+
+| Placeholder | Value |
+|---|---|
+| `{{project}}` | project name |
+| `{{tags}}` | `["project/PROJECT"]` — no report-type tag, just the project tag |
+| `{{first_commit}}` | earliest commit date (YYYY-MM-DD) |
+| `{{total_commits}}` | total commit count across all time |
+| `{{active_years}}` | comma-separated list of years with commits (e.g. `2024, 2025, 2026`) |
+| `{{contributors}}` | comma-separated list of distinct author names |
+| `{{resume_taches}}` | 3-4 sentence narrative describing what this project is and what it has accomplished overall, inferred from commit history — **single line, no newlines** |
+| `{{highlights}}` | 5-8 key milestones or turning points across the project's entire lifetime — one bullet per line, each starting with `> - ` |
+| `{{yearly_links}}` | one `- [[PROJECT/Y-YYYY/Y-YYYY\|Y-YYYY]]` per year found, newest first |
+
 ```bash
-obsidian vault="VAULT" create path="Reports/PROJECT/PROJECT.md" content="---
-type: claude-project-index
-project: PROJECT
-tags: [\"project/PROJECT\"]
-parent: \"[[Dashboard]]\"
----
-
-# PROJECT
-
-## Yearly Reports
-
-- [[PROJECT/Y-YYYY/Y-YYYY|Y-YYYY]]
-- ..." overwrite
+obsidian vault="VAULT" create path="Reports/PROJECT/PROJECT.md" content="<filled template>" overwrite
 ```
 
 ## Step 6 — Print summary
