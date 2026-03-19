@@ -17,7 +17,7 @@ parent: "[[MyApp/2026-03/W11/MyApp-W11-2026]]"
 
 ## Commits
 
-- Add user authentication endpoint (a3f2b1c) — Alice Dev
-- Fix null pointer exception in order service (b7d4e2f) — Bob Engineer
-- Refactor database connection pool (c9a1f3d) — Alice Dev
-- Update README with API usage examples (d2e5b8a) — Bob Engineer
+- Add user authentication endpoint (a3f2b1c): Alice Dev
+- Fix null pointer exception in order service (b7d4e2f): Bob Engineer
+- Refactor database connection pool (c9a1f3d): Alice Dev
+- Update README with API usage examples (d2e5b8a): Bob Engineer

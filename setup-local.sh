@@ -32,7 +32,7 @@ if [[ ! -f ".env" ]]; then
 # Example (Windows/Git Bash): VAULT_PATH=/c/Users/YourName/Documents/MyVault
 VAULT_PATH=
 
-# Short name of your Obsidian vault — this is the folder name shown in Obsidian's title bar.
+# Short name of your Obsidian vault: this is the folder name shown in Obsidian's title bar.
 # Example: if your vault is at /home/user/MyNotes, set VAULT_NAME=MyNotes
 VAULT_NAME=
 
@@ -40,12 +40,12 @@ VAULT_NAME=
 # Examples: English, French, Spanish, German, Japanese...
 LANGUAGE=English
 
-# GitHub personal access token — required ONLY for private repos accessed via HTTPS
+# GitHub personal access token: required ONLY for private repos accessed via HTTPS
 # Generate one at: https://github.com/settings/tokens (scope: repo)
 # Leave empty if you use SSH or only public repos.
 GITHUB_TOKEN=
 EOF
-  echo "   [OK] .env created — set VAULT_PATH and VAULT_NAME before running reports."
+  echo "   [OK] .env created: set VAULT_PATH and VAULT_NAME before running reports."
 else
   echo "   [OK] .env already exists, skipping."
 fi
@@ -107,8 +107,8 @@ echo "   [OK] Scripts are executable."
 echo ""
 echo "=== Setup complete ==="
 echo "Next steps:"
-echo "  1. Edit .env       — set VAULT_PATH and VAULT_NAME"
-echo "  2. Edit projects.config — add your repositories"
+echo "  1. Edit .env      : set VAULT_PATH and VAULT_NAME"
+echo "  2. Edit projects.config: add your repositories"
 echo "  3. Open Obsidian and make sure the CLI plugin is active"
 echo "  4. In Claude Code, run: /report-orchestrator"
 echo ""

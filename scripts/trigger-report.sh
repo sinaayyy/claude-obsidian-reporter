@@ -108,13 +108,13 @@ run_report() {
   commits=$(git -C "$path" log \
     --after="${TARGET_DATE}T00:00:00" \
     --before="${TARGET_DATE}T23:59:59" \
-    --pretty=format:"  - %s (%h) — %an" \
+    --pretty=format:"  - %s (%h) by %an" \
     --no-merges 2>/dev/null)
   local nb_commits
   nb_commits=$(echo "$commits" | grep -c "^  -" 2>/dev/null || echo 0)
 
   if [[ "$nb_commits" -eq 0 ]]; then
-    echo "[INFO] No commits found for $TARGET_DATE — will write empty report."
+    echo "[INFO] No commits found for $TARGET_DATE: will write empty report."
   else
     echo "[INFO] Found $nb_commits commit(s):"
     echo "$commits"
@@ -134,7 +134,7 @@ run_report() {
   # --- Invoke Claude ---
   echo ""
   echo "[INFO] Invoking Claude (report-orchestrator skill)..."
-  echo "[INFO] Started at $(date '+%H:%M:%S') — streaming output below:"
+  echo "[INFO] Started at $(date '+%H:%M:%S'): streaming output below:"
   echo "────────────────────────────────────────────────────"
   local start_ts=$SECONDS
   local raw_output
@@ -176,9 +176,9 @@ run_report() {
   echo "────────────────────────────────────────────────────"
 
   if [[ $exit_code -eq 0 ]]; then
-    echo "[OK] $name — done in ${elapsed}s."
+    echo "[OK] $name: done in ${elapsed}s."
   else
-    echo "[ERROR] $name — Claude exited with code $exit_code after ${elapsed}s."
+    echo "[ERROR] $name: Claude exited with code $exit_code after ${elapsed}s."
   fi
 }
 

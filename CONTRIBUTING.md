@@ -53,7 +53,7 @@ Thank you for your interest in contributing!
    - How you tested it
    - Any platform-specific notes (Linux / macOS / Windows)
 
-4. Fill in the PR template — incomplete PRs may be closed without review.
+4. Fill in the PR template: incomplete PRs may be closed without review.
 
 ## How to report a bug
 

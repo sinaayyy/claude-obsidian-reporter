@@ -43,14 +43,14 @@ DAILY_CODE=$?
 # --- Weekly (Fridays only) ---
 if [[ "$IS_FRIDAY" == "true" ]]; then
   echo ""
-  echo "▶ Friday detected — running weekly report..."
+  echo "▶ Friday detected: running weekly report..."
   MODE=weekly TARGET_DATE="$TARGET_DATE" bash scripts/trigger-report.sh
 fi
 
 # --- Monthly (last day of month only) ---
 if [[ "$IS_LAST_DAY_OF_MONTH" == "true" ]]; then
   echo ""
-  echo "▶ Last day of month detected — running monthly report..."
+  echo "▶ Last day of month detected: running monthly report..."
   MODE=monthly TARGET_DATE="$TARGET_DATE" bash scripts/trigger-report.sh
 fi
 

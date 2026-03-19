@@ -28,25 +28,25 @@ warn() { echo "    [WARN]  $*"; (( WARNINGS++ )); (( PROJECT_WARNINGS++ )); }
 extract_link() { echo "$1" | grep -oP '(?<=\[\[)[^\|\]]+'; }
 
 # Validate parent field of a file against the expected wikilink target.
-# Prints nothing on success — errors only.
+# Prints nothing on success: errors only.
 check_parent() {
   local file="$1" expected="$2" label="$3"
   local raw actual
 
   raw=$(grep -m1 "^parent:" "$file" 2>/dev/null)
   if [[ -z "$raw" ]]; then
-    err "$label — missing parent field"
+    err "$label: missing parent field"
     return
   fi
 
   actual=$(extract_link "$raw")
   if [[ "$actual" != "$expected" ]]; then
-    err "$label — cross-hierarchy parent: got [[$actual]], expected [[$expected]]"
+    err "$label: cross-hierarchy parent: got [[$actual]], expected [[$expected]]"
     return
   fi
 
   if [[ ! -f "$REPORTS/$expected.md" ]]; then
-    err "$label — parent [[$expected]] target does not exist"
+    err "$label: parent [[$expected]] target does not exist"
   fi
 }
 
@@ -57,26 +57,26 @@ check_tags() {
   local tags_line
   tags_line=$(grep -m1 "^tags:" "$file" 2>/dev/null)
   if [[ -z "$tags_line" ]]; then
-    err "$label — missing tags field (graph coloring will not work)"
+    err "$label: missing tags field (graph coloring will not work)"
     return
   fi
   for tag in "$@"; do
     if ! echo "$tags_line" | grep -q "$tag"; then
-      err "$label — missing tag '$tag' in frontmatter (graph coloring broken)"
+      err "$label: missing tag '$tag' in frontmatter (graph coloring broken)"
     fi
   done
 }
 
-# Check commits frontmatter — errors if 0 (file should not exist)
+# Check commits frontmatter: errors if 0 (file should not exist)
 check_commits() {
   local file="$1" label="$2"
   local c
   c=$(grep -m1 "^commits:" "$file" | awk '{print $2}')
-  [[ "$c" == "0" ]] && err "$label — commits: 0 (report should not have been written)"
+  [[ "$c" == "0" ]] && err "$label: commits: 0 (report should not have been written)"
 }
 
 echo "╔══════════════════════════════════════════════════╗"
-echo "║  check-vault — vault conformity check            ║"
+echo "║  check-vault: vault conformity check            ║"
 echo "╠══════════════════════════════════════════════════╣"
 printf  "║  Vault: %-41s║\n" "$VAULT_PATH"
 echo "╚══════════════════════════════════════════════════╝"
@@ -86,7 +86,7 @@ echo ""
 echo "── Dashboard"
 [[ -f "$REPORTS/Dashboard.md" ]] \
   && echo "    OK" \
-  || { echo "    [ERROR] Dashboard.md missing — run the skill once to bootstrap it"; (( ERRORS++ )); }
+  || { echo "    [ERROR] Dashboard.md missing: run the skill once to bootstrap it"; (( ERRORS++ )); }
 echo ""
 
 # ── 2. Current/ pointers ─────────────────────────────────────────────────────
@@ -97,9 +97,9 @@ for ptr in "$REPORTS/Current/"*.md; do
   base=$(basename "$ptr")
   link=$(extract_link "$(cat "$ptr")")
   if [[ -z "$link" ]]; then
-    err "Current/$base — no wikilink found"; (( CURRENT_ISSUES++ ))
+    err "Current/$base: no wikilink found"; (( CURRENT_ISSUES++ ))
   elif [[ ! -f "$REPORTS/$link.md" ]]; then
-    err "Current/$base — points to [[$link]] which does not exist"; (( CURRENT_ISSUES++ ))
+    err "Current/$base: points to [[$link]] which does not exist"; (( CURRENT_ISSUES++ ))
   fi
 done
 [[ $CURRENT_ISSUES -eq 0 ]] && echo "    OK"
@@ -113,7 +113,7 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
 
   PROJECT_DIR="$REPORTS/$name"
 
-  # Project index — parent must be exactly [[Dashboard]]
+  # Project index: parent must be exactly [[Dashboard]]
   INDEX="$PROJECT_DIR/$name.md"
   if [[ ! -f "$INDEX" ]]; then
     err "$name/$name.md missing (project index)"
@@ -129,7 +129,7 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
 
     # Phantom folder
     if [[ ! -f "$year_dir/$Y.md" ]]; then
-      err "$name/$Y/ — phantom folder ($Y.md missing)"
+      err "$name/$Y/: phantom folder ($Y.md missing)"
     else
       check_parent "$year_dir/$Y.md" "$name/$name" "$name/$Y/$Y.md"
       check_tags   "$year_dir/$Y.md" "$name/$Y/$Y.md" "report/yearly" "project/$name"
@@ -140,7 +140,7 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
     for f in "$year_dir"/*.md; do
       [[ -f "$f" ]] || continue
       [[ "$(basename "$f")" == "$Y.md" ]] && continue
-      warn "$name/$Y/$(basename "$f") — unexpected file in year folder"
+      warn "$name/$Y/$(basename "$f"): unexpected file in year folder"
     done
 
     # Walk M-MM/
@@ -149,7 +149,7 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
       M=$(basename "$month_dir")
 
       if [[ ! -f "$month_dir/$M.md" ]]; then
-        err "$name/$Y/$M/ — phantom folder ($M.md missing)"
+        err "$name/$Y/$M/: phantom folder ($M.md missing)"
       else
         check_parent "$month_dir/$M.md" "$name/$Y/$Y" "$name/$Y/$M/$M.md"
         check_tags   "$month_dir/$M.md" "$name/$Y/$M/$M.md" "report/monthly" "project/$name"
@@ -159,7 +159,7 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
       for f in "$month_dir"/*.md; do
         [[ -f "$f" ]] || continue
         [[ "$(basename "$f")" == "$M.md" ]] && continue
-        warn "$name/$Y/$M/$(basename "$f") — unexpected file in month folder"
+        warn "$name/$Y/$M/$(basename "$f"): unexpected file in month folder"
       done
 
       # Walk W-NN/ (ISO week numbers: W-01 to W-52, or within-month W-1 to W-5)
@@ -168,7 +168,7 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
         W=$(basename "$week_dir")
 
         if [[ ! -f "$week_dir/$W.md" ]]; then
-          err "$name/$Y/$M/$W/ — phantom folder ($W.md missing)"
+          err "$name/$Y/$M/$W/: phantom folder ($W.md missing)"
         else
           check_parent "$week_dir/$W.md" "$name/$Y/$M/$M" "$name/$Y/$M/$W/$W.md"
           check_tags   "$week_dir/$W.md" "$name/$Y/$M/$W/$W.md" "report/weekly" "project/$name"
@@ -191,16 +191,16 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
           base=$(basename "$f")
           [[ "$base" == "$W.md" ]] && continue
           [[ "$base" =~ ^D-[0-9]{2}\.md$ ]] && continue
-          warn "$name/$Y/$M/$W/$base — unexpected file in week folder"
+          warn "$name/$Y/$M/$W/$base: unexpected file in week folder"
         done
       done
     done
   done
 
   if [[ $PROJECT_ERRORS -eq 0 && $PROJECT_WARNINGS -eq 0 ]]; then
-    echo "── $name — OK"
+    echo "── $name: OK"
   else
-    echo "── $name — $PROJECT_ERRORS error(s), $PROJECT_WARNINGS warning(s)"
+    echo "── $name: $PROJECT_ERRORS error(s), $PROJECT_WARNINGS warning(s)"
   fi
   echo ""
 
@@ -209,9 +209,9 @@ done < projects.config
 # ── 4. Summary ────────────────────────────────────────────────────────────────
 echo "╔══════════════════════════════════════════════════╗"
 if [[ $ERRORS -eq 0 && $WARNINGS -eq 0 ]]; then
-  echo "║  ✓ Vault is clean — no issues found              ║"
+  echo "║  ✓ Vault is clean: no issues found              ║"
 elif [[ $ERRORS -eq 0 ]]; then
-  printf "║  ✓ No errors — %d warning(s)%-23s║\n" "$WARNINGS" ""
+  printf "║  ✓ No errors: %d warning(s)%-23s║\n" "$WARNINGS" ""
 else
   printf "║  ✗ %d error(s), %d warning(s)%-27s║\n" "$ERRORS" "$WARNINGS" ""
 fi
