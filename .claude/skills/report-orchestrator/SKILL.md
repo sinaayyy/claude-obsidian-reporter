@@ -15,6 +15,10 @@ You are the end-of-day report orchestrator. You run entirely within this Claude 
 - `language` — language for all generated text (defaults to `English`)
 - `backfill` — YYYY-MM-DD or `all` — if provided, generate all missing reports from that date up to `$DATE` before running the normal flow
 - `tags` — comma-separated extra tags to add to all reports in this run (e.g. `tags=client/acme,sprint/42`)
+- `check` — run vault conformity audit only (no reports generated) — see [Check mode](#check-mode)
+- `fix` — run audit then auto-fix all detected issues — see [Fix mode](#fix-mode)
+
+If `check` or `fix` is present, **skip the normal report flow entirely** and jump to the corresponding mode.
 
 ## Vault structure
 
@@ -451,5 +455,59 @@ Print these lines as you go — do not buffer and print all at the end.
 - `overwrite` is a flag without `--`
 - Terminal must NOT run as administrator
 - If a project has no commits for a period, **do not write the report** — skip it silently to avoid detached nodes in the graph
+
+---
+
+## Check mode
+
+Triggered by `/report-orchestrator check`. Skip all report generation. Run the vault conformity audit and print results.
+
+```bash
+bash scripts/check-vault.sh
+```
+
+Print a clear summary of what was found: errors (broken links, phantom folders, wrong tags, zero-commit reports) and warnings (unexpected files). Exit when done — do not fix anything.
+
+---
+
+## Fix mode
+
+Triggered by `/report-orchestrator fix`. Run the audit first, then process each error category in order:
+
+### 1. Zero-commit reports
+Delete the file — it should not exist:
+```bash
+obsidian vault="VAULT" delete path="PATH"
+```
+
+### 2. Wrong or missing tags
+Read the file, extract the current frontmatter `tags:` line, rewrite it with the correct tags for the report type and project. Use `obsidian vault="VAULT" create path="PATH" content="<full file with corrected tags>" overwrite`.
+
+Correct tags per type:
+- Daily: `[report/daily, "project/PROJECT"]` + any extra tags already present
+- Weekly: `[report/weekly, "project/PROJECT"]` + extras
+- Monthly: `[report/monthly, "project/PROJECT"]` + extras
+- Yearly: `[report/yearly, "project/PROJECT"]` + extras
+- Project index: `["project/PROJECT"]`
+
+### 3. Wrong or broken parent link
+Read the file, rewrite the `parent:` frontmatter field with the correct wikilink computed from the file's position in the folder tree:
+- Daily at `P/Y/M/W/D-DD.md` → `parent: "[[P/Y/M/W/W]]"`
+- Weekly at `P/Y/M/W/W.md` → `parent: "[[P/Y/M/M]]"`
+- Monthly at `P/Y/M/M.md` → `parent: "[[P/Y/Y]]"`
+- Yearly at `P/Y/Y.md` → `parent: "[[P/P]]"`
+- Project index → `parent: "[[Dashboard]]"`
+
+### 4. Broken Current/ pointer
+Find the most recent daily report that actually exists for the project:
+```bash
+obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "D-[0-9][0-9]\.md" | sort | tail -1
+```
+Rewrite `Reports/Current/PROJECT.md` to point to it.
+
+### 5. Phantom folder (aggregate .md missing)
+The folder exists with daily/weekly files inside but the aggregate report is missing. Regenerate it using the same logic as the normal report flow — read the git log for the relevant period, generate prose, write the file via obsidian CLI. Apply the exact same templates and placeholders as the normal run.
+
+After all fixes are applied, re-run `bash scripts/check-vault.sh` and print the final result.
 
 </instructions>
