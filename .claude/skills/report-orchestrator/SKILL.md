@@ -572,34 +572,57 @@ Read `projects.config` and extract the path column (2nd field). Resolve to absol
 
 ### 4. Present results
 
-Print a numbered list of untracked repos found:
+For each repo, gather metadata:
+```bash
+git -C "$repo" log --oneline 2>/dev/null | wc -l                           # commit count
+git -C "$repo" log -1 --format="%ad" --date=format:"%Y-%m-%d" 2>/dev/null  # last commit date
+git -C "$repo" remote get-url origin 2>/dev/null                            # remote URL if any
+git -C "$repo" symbolic-ref --short HEAD 2>/dev/null                        # default branch
+```
+
+Derive the suggested project name from the directory basename (keep original casing and hyphens).
+
+Print a numbered list showing suggested name, path, branch, last commit date, and commit count:
 
 ```
 Discovered 5 untracked git repositories:
 
-  1. /home/user/projects/my-app          (last commit: 2026-03-18, 142 commits)
-  2. /home/user/projects/client-x        (last commit: 2026-02-28, 67 commits)
-  3. /home/user/repos/side-project       (last commit: 2025-11-01, 23 commits)
-  4. /home/user/code/scripts             (last commit: 2026-01-10, 8 commits)
-  5. /home/user/dev/experiments/proto    (last commit: 2024-06-15, 3 commits)
+  1. my-app        /home/user/projects/my-app       [main]   2026-03-18  142 commits
+  2. client-x      /home/user/projects/client-x     [main]   2026-02-28   67 commits
+  3. side-project  /home/user/repos/side-project    [main]   2025-11-01   23 commits
+  4. scripts       /home/user/code/scripts          [master] 2026-01-10    8 commits
+  5. proto         /home/user/dev/experiments/proto [dev]    2024-06-15    3 commits
 
-Enter numbers to add (e.g. 1 3 5), "all", or "none":
+Add which repos? (e.g. 1 3 5), "all", or press Enter to skip:
 ```
 
-For each repo, gather metadata with:
-```bash
-git -C "$repo" log --oneline | wc -l          # commit count
-git -C "$repo" log -1 --format="%ad" --date=format:"%Y-%m-%d"  # last commit date
-```
+If none are found, print "No untracked git repositories found in the scan paths." and stop.
 
 ### 5. Add selected repos
 
-For each selected repo:
-- Derive a project name from the directory name (capitalize first letter, replace hyphens with spaces if desired — but keep the original folder name by default)
-- Detect the default branch: `git -C "$repo" symbolic-ref --short HEAD`
-- Add to `projects.config` using the same logic as [Add-project mode](#add-project-mode)
+For each selected repo, write a line to `projects.config` using all auto-detected values:
+- name: suggested name from step 4
+- path: absolute path
+- url: remote origin URL if detected (empty otherwise)
+- branches: default branch detected in step 4
 
-Print a summary of what was added.
+Use the same duplicate-check and write logic as [Add-project mode](#add-project-mode).
+
+Print a confirmation line for each repo added:
+```
+Added: my-app | /home/user/projects/my-app | https://github.com/user/my-app | main |
+```
+
+### 6. Offer to run reports immediately
+
+After all repos are added, ask:
+
+```
+Added 3 project(s) to projects.config.
+Run today's report for these projects now? (yes/no)
+```
+
+If yes: run the full report flow restricted to the newly added projects only. This gives instant vault coverage without a separate command.
 
 ---
 
