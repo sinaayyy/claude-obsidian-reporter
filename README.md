@@ -25,7 +25,7 @@ All levels are written on every run and kept up to date. Missed a day? The skill
 
 ## How it works
 
-- **Only reads commit messages.** No source files, no diffs. Fast and privacy-friendly.
+- **Only reads commit messages.** No source files, no diffs. If most messages are uninformative (`wip`, `fix`, `...`), falls back to reading changed file names only — never file contents.
 - **Synthesizes at every level.** Claude writes fresh prose for each report type, with abstraction that scales: specific tasks for daily, themes for weekly, strategy for monthly, narrative for yearly.
 - **Writes directly into Obsidian** via the CLI plugin. No intermediate files, no copy-paste.
 - **Runs entirely inside your Claude Code session.** No background processes, no subshells spawned.

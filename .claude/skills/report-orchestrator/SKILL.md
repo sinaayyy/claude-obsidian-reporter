@@ -227,6 +227,18 @@ git -C "$path" log $BRANCH_ARGS --after="${YEAR}-01-01T00:00:00" --before="${DAT
   --pretty=format:"- %s (%h) — %an" --no-merges
 ```
 
+**Thin commit fallback:** after extracting the log, check whether the commit messages are meaningful. A commit message is considered thin if it is empty, a single generic word (`fix`, `wip`, `update`, `test`, `commit`, `save`, `misc`, `temp`, `.`, `...`), or shorter than 10 characters. If **more than half** the commits in the period are thin, supplement the log with file-level context:
+
+```bash
+# For each thin commit hash, get the list of changed files
+git -C "$path" show --stat --no-merges <hash>
+# or for the whole period at once:
+git -C "$path" log $BRANCH_ARGS --after="..." --before="..." \
+  --no-merges --name-only --pretty=format:"--- %h %s"
+```
+
+Use the changed file names and paths to infer what was worked on (e.g. `src/auth/login.ts` → authentication, `docs/api.md` → documentation). Incorporate these inferences into `{{resume_taches}}` and `{{liste_commits}}`. Do not fabricate details — only state what the files suggest. Flag thin commits in the list with a note like `- wip (a3f1c2) [files: login.ts, session.ts]`.
+
 This rule applies to **all report types** — if 0 commits for the period, **skip writing the report entirely**. Do not create the file. A note with no commits would appear as a detached node in the graph.
 
 - Daily with 0 commits → no file
