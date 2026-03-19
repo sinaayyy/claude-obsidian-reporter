@@ -162,6 +162,23 @@ After editing, re-run the skill for any date to regenerate:
 
 See [`examples/output/`](examples/output/) for what filled reports look like.
 
+## Sanity check
+
+If your graph looks off (phantom nodes, isolated clusters, broken links), run:
+
+```bash
+bash scripts/check-vault.sh
+```
+
+It validates the entire vault structure against the expected hierarchy for each project:
+- **Phantom folders** — a `W-N/` or `M-MM/` folder with no aggregate report inside
+- **Cross-hierarchy links** — a daily pointing to the wrong week, a week to the wrong month, etc.
+- **Broken parents** — `parent` wikilink pointing to a file that doesn't exist
+- **Broken `Current/` pointers** — today's shortcut pointing to a deleted or renamed daily
+- **Zero-commit reports** — reports that should never have been written
+
+Exits with code `1` if any errors are found, `0` if clean.
+
 ## Cost
 
 Very low — the skill reads Git logs and writes Markdown files. Claude only generates short prose summaries from your commit history, making each run lightweight on tokens.
