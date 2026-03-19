@@ -7,6 +7,7 @@
 #   - broken Current/ pointers
 #   - zero-commit reports
 #   - unexpected files at each level
+#   - missing or wrong tags (breaks graph coloring)
 # Usage: bash scripts/check-vault.sh
 
 cd "$(dirname "$0")/.." || exit 1
@@ -47,6 +48,23 @@ check_parent() {
   if [[ ! -f "$REPORTS/$expected.md" ]]; then
     err "$label — parent [[$expected]] target does not exist"
   fi
+}
+
+# Check that required tags are present in the frontmatter tags field.
+# $1 = file  $2 = label  $3... = required tags (e.g. "report/daily" "project/MyApp")
+check_tags() {
+  local file="$1" label="$2"; shift 2
+  local tags_line
+  tags_line=$(grep -m1 "^tags:" "$file" 2>/dev/null)
+  if [[ -z "$tags_line" ]]; then
+    err "$label — missing tags field (graph coloring will not work)"
+    return
+  fi
+  for tag in "$@"; do
+    if ! echo "$tags_line" | grep -q "$tag"; then
+      err "$label — missing tag '$tag' in frontmatter (graph coloring broken)"
+    fi
+  done
 }
 
 # Check commits frontmatter — errors if 0 (file should not exist)
@@ -101,6 +119,7 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
     err "$name/$name.md missing (project index)"
   else
     check_parent "$INDEX" "Dashboard" "$name/$name.md"
+    check_tags   "$INDEX" "$name/$name.md" "project/$name"
   fi
 
   # Walk Y-YYYY/
@@ -112,8 +131,8 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
     if [[ ! -f "$year_dir/$Y.md" ]]; then
       err "$name/$Y/ — phantom folder ($Y.md missing)"
     else
-      # Yearly parent must be [[NAME/NAME]] (project index)
       check_parent "$year_dir/$Y.md" "$name/$name" "$name/$Y/$Y.md"
+      check_tags   "$year_dir/$Y.md" "$name/$Y/$Y.md" "report/yearly" "project/$name"
       check_commits "$year_dir/$Y.md" "$name/$Y/$Y.md"
     fi
 
@@ -132,8 +151,8 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
       if [[ ! -f "$month_dir/$M.md" ]]; then
         err "$name/$Y/$M/ — phantom folder ($M.md missing)"
       else
-        # Monthly parent must be [[NAME/Y-YYYY/Y-YYYY]]
         check_parent "$month_dir/$M.md" "$name/$Y/$Y" "$name/$Y/$M/$M.md"
+        check_tags   "$month_dir/$M.md" "$name/$Y/$M/$M.md" "report/monthly" "project/$name"
         check_commits "$month_dir/$M.md" "$name/$Y/$M/$M.md"
       fi
 
@@ -151,8 +170,8 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
         if [[ ! -f "$week_dir/$W.md" ]]; then
           err "$name/$Y/$M/$W/ — phantom folder ($W.md missing)"
         else
-          # Weekly parent must be [[NAME/Y-YYYY/M-MM/M-MM]]
           check_parent "$week_dir/$W.md" "$name/$Y/$M/$M" "$name/$Y/$M/$W/$W.md"
+          check_tags   "$week_dir/$W.md" "$name/$Y/$M/$W/$W.md" "report/weekly" "project/$name"
           check_commits "$week_dir/$W.md" "$name/$Y/$M/$W/$W.md"
         fi
 
@@ -162,6 +181,7 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
           D=$(basename "$daily")
           # Daily parent must be [[NAME/Y-YYYY/M-MM/W-N/W-N]]
           check_parent "$daily" "$name/$Y/$M/$W/$W" "$name/$Y/$M/$W/$D"
+          check_tags   "$daily" "$name/$Y/$M/$W/$D" "report/daily" "project/$name"
           check_commits "$daily" "$name/$Y/$M/$W/$D"
         done
 

@@ -176,6 +176,7 @@ It validates the entire vault structure against the expected hierarchy for each 
 - **Broken parents** — `parent` wikilink pointing to a file that doesn't exist
 - **Broken `Current/` pointers** — today's shortcut pointing to a deleted or renamed daily
 - **Zero-commit reports** — reports that should never have been written
+- **Wrong or missing tags** — `report/daily`, `report/weekly`, etc. missing from frontmatter, which breaks graph node coloring
 
 Exits with code `1` if any errors are found, `0` if clean.
 
