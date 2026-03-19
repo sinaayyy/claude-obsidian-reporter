@@ -75,6 +75,8 @@ The `optional_tags` column lets you attach permanent tags to a project; they'll 
 /report-orchestrator tags=sprint/42,client/acme           ← add tags to all reports today
 /report-orchestrator check                                ← audit vault structure only
 /report-orchestrator fix                                  ← audit + auto-fix all issues
+/report-orchestrator add-project name=X path=/repo       ← add a project to projects.config
+/report-orchestrator remove-project name=X               ← remove a project (with optional vault cleanup)
 ```
 
 Open Claude Code in the `claude-obsidian-reporter` directory (where `projects.config` lives) and run the command. Reports appear in your vault instantly. No need to have Obsidian open.

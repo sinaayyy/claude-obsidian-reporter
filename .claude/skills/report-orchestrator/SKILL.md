@@ -17,8 +17,10 @@ You are the end-of-day report orchestrator. You run entirely within this Claude 
 - `tags`: comma-separated extra tags to add to all reports in this run (e.g. `tags=client/acme,sprint/42`)
 - `check`: run vault conformity audit only (no reports generated): see [Check mode](#check-mode)
 - `fix`: run audit then auto-fix all detected issues: see [Fix mode](#fix-mode)
+- `add-project`: add a project to `projects.config`: see [Add-project mode](#add-project-mode)
+- `remove-project`: remove a project from `projects.config`: see [Remove-project mode](#remove-project-mode)
 
-If `check` or `fix` is present, **skip the normal report flow entirely** and jump to the corresponding mode.
+If any of `check`, `fix`, `add-project`, `remove-project` is present, **skip the normal report flow entirely** and jump to the corresponding mode.
 
 ## Vault structure
 
@@ -509,5 +511,67 @@ Rewrite `Reports/Current/PROJECT.md` to point to it.
 The folder exists with daily/weekly files inside but the aggregate report is missing. Regenerate it using the same logic as the normal report flow: read the git log for the relevant period, generate prose, write the file via obsidian CLI. Apply the exact same templates and placeholders as the normal run.
 
 After all fixes are applied, re-run `bash scripts/check-vault.sh` and print the final result.
+
+---
+
+## Add-project mode
+
+Triggered by `/report-orchestrator add-project name=X path=/absolute/path`.
+
+Optional parameters:
+- `url`: git remote URL (for auto-clone if path does not exist yet)
+- `branches`: comma-separated branch names to track (e.g. `main,develop`)
+- `tags`: comma-separated permanent tags for all reports of this project (e.g. `client/acme,team/backend`)
+
+Steps:
+
+1. **Check for duplicates**: read `projects.config` and verify no line already starts with `name|`. If it exists, print an error and stop.
+
+2. **Validate path**: check that the path exists and is a git repository:
+```bash
+git -C "$path" rev-parse --is-inside-work-tree 2>/dev/null
+```
+If the path does not exist and no `url` was provided, print an error and stop. If a `url` was provided, note that the repo will be cloned on the first run.
+
+3. **Append to projects.config**: add the new line in the correct format:
+```
+NAME|/absolute/path|optional_url|optional_branches|optional_tags
+```
+Omit trailing `|` for empty optional fields. Place the new entry after the last non-comment line.
+
+4. Print a confirmation:
+```
+[add-project] Added: NAME | /absolute/path
+Projects in projects.config: N
+Run /report-orchestrator to generate the first reports.
+```
+
+---
+
+## Remove-project mode
+
+Triggered by `/report-orchestrator remove-project name=X`.
+
+Steps:
+
+1. **Find the project**: read `projects.config` and locate the line starting with `name|`. If not found, print an error and stop.
+
+2. **Show what will be removed**: print the matching line and ask for confirmation before deleting.
+
+3. **Remove the line**: rewrite `projects.config` without that line.
+
+4. **Offer vault cleanup**: ask the user if they want to delete the project's vault folder (`Reports/NAME/`) and its `Current/NAME.md` shortcut. If yes, run:
+```bash
+obsidian vault="VAULT" delete path="Reports/NAME"
+obsidian vault="VAULT" delete path="Reports/Current/NAME.md"
+```
+If no, leave the vault files as-is (they become orphaned nodes in the graph).
+
+5. Print a confirmation:
+```
+[remove-project] Removed: NAME
+Vault files: deleted / kept (per user choice)
+Projects remaining: N
+```
 
 </instructions>
