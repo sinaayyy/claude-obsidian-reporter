@@ -11,6 +11,10 @@ updated: {{date}}
 > [!check] This week across projects
 > {{workspace_highlights}}
 
+## Projects
+
+{{projects_overview}}
+
 ## Recent Daily Reports
 
 ```dataview

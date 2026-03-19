@@ -429,6 +429,7 @@ Load `Templates/dashboard-template.md` and fill in:
 | `{{date}}` | today's date (YYYY-MM-DD) |
 | `{{workspace_summary}}` | 2-3 sentences synthesizing activity across **all** projects for the current week: what is the overall focus, what moved forward, any notable pattern: **single line, no newlines** |
 | `{{workspace_highlights}}` | one bullet per active project with a one-line status, each starting with `> - **PROJECT**: `: e.g. `> - **MyApp**: shipped auth refactor, 8 commits` |
+| `{{projects_overview}}` | one block per project, based on reading each project index (`Reports/PROJECT/PROJECT.md`): project name as a wikilink header, then 2-3 sentences covering what the project is, its total commit span, and the main themes from the project index essay. Tone: timeless, factual. One blank line between projects. |
 
 ```bash
 obsidian vault="VAULT" create path="Reports/Dashboard.md" content="<filled template>" overwrite
