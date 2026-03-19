@@ -337,15 +337,13 @@ Command:
 obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/Y-YYYY.md" content="..." overwrite
 ```
 
-Then update (or create) the project index at `Reports/PROJECT/PROJECT.md`. Always overwrite it so it stays in sync — list all yearly folders:
+**Project index** (always — unconditional, run for every project regardless of commit activity):
+
+After all report writes, always update `Reports/PROJECT/PROJECT.md`. Scan the vault for existing yearly report files then build one link per year, newest first:
 
 ```bash
-# List all yearly folders for this project
 obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "Y-[0-9]\{4\}/Y-[0-9]\{4\}\.md"
 ```
-
-Build the project index content with:
-- One `[[PROJECT/Y-YYYY/Y-YYYY|Y-YYYY]]` link per year found, sorted newest first
 
 ```bash
 obsidian vault="VAULT" create path="Reports/PROJECT/PROJECT.md" content="---
