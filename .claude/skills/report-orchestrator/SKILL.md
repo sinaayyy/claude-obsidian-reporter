@@ -128,18 +128,12 @@ Check if the dashboard exists:
 obsidian vault="VAULT" file path="Reports/Dashboard.md"
 ```
 
-- If it **exists** → skip
-- If it **does not exist** → read `Templates/dashboard-template.md` and write it:
+- If it **does not exist** → bookmark it after creation:
 ```bash
-obsidian vault="VAULT" create path="Reports/Dashboard.md" content="<contents of dashboard-template.md>"
+obsidian vault="VAULT" bookmark path="Reports/Dashboard.md" title="Working"
 ```
 
-The dashboard uses Dataview queries that auto-refresh from report frontmatter — it never needs to be rewritten after creation.
-
-Then bookmark it:
-```bash
-obsidian vault="VAULT" bookmark path="Reports/Dashboard.md" title="Reports Dashboard"
-```
+The dashboard is always overwritten at the end of each run (Step 6) with a fresh cross-project summary — see Step 6.
 
 ## Step 4 — Catchup missing days
 
@@ -395,11 +389,28 @@ Load `Templates/project-index-template.md` and fill in all placeholders:
 obsidian vault="VAULT" create path="Reports/PROJECT/PROJECT.md" content="<filled template>" overwrite
 ```
 
-## Step 6 — Print summary
+## Step 6 — Update Dashboard
+
+After all projects have been processed, always overwrite `Reports/Dashboard.md` with a fresh cross-project summary.
+
+Load `Templates/dashboard-template.md` and fill in:
+
+| Placeholder | Value |
+|---|---|
+| `{{date}}` | today's date (YYYY-MM-DD) |
+| `{{workspace_summary}}` | 2-3 sentences synthesizing activity across **all** projects for the current week — what is the overall focus, what moved forward, any notable pattern — **single line, no newlines** |
+| `{{workspace_highlights}}` | one bullet per active project with a one-line status, each starting with `> - **PROJECT**: ` — e.g. `> - **MyApp**: shipped auth refactor, 8 commits` |
+
+```bash
+obsidian vault="VAULT" create path="Reports/Dashboard.md" content="<filled template>" overwrite
+```
+
+## Step 7 — Print summary
 
 ```
 ╔══════════════════════════════════════════════════╗
 ║  report-orchestrator — done                      ║
+
 ╠══════════════════════════════════════════════════╣
 ║  Date   : YYYY-MM-DD  Week: WNN
 ║  Reports: daily [+ weekly] [+ monthly] [+ yearly]

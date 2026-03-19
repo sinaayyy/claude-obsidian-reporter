@@ -1,8 +1,15 @@
 ---
 type: claude-reports-dashboard
+updated: {{date}}
 ---
 
-# Reports Dashboard
+# Working
+
+> [!summary] Overview
+> {{workspace_summary}}
+
+> [!check] This week across projects
+> {{workspace_highlights}}
 
 ## Recent Daily Reports
 
