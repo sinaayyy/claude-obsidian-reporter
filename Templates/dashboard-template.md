@@ -44,3 +44,16 @@ FROM ""
 WHERE type = "claude-monthly-report"
 SORT month DESC
 ```
+
+## Yearly Summaries
+
+```dataview
+TABLE WITHOUT ID
+  file.link as "Report",
+  project as "Project",
+  year as "Year",
+  commits as "Commits"
+FROM ""
+WHERE type = "claude-yearly-report"
+SORT year DESC
+```
