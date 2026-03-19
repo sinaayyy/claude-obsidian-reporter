@@ -81,6 +81,25 @@ The `optional_tags` column lets you attach permanent tags to a project; they'll 
 
 Open Claude Code in the `claude-obsidian-reporter` directory (where `projects.config` lives) and run the command. Reports appear in your vault instantly. No need to have Obsidian open.
 
+### Managing projects
+
+Add a project to the reporting:
+
+```
+/report-orchestrator add-project name=MyApp path=/home/user/projects/my-app
+/report-orchestrator add-project name=ClientX path=/repos/client url=https://github.com/org/client branches=main tags=client/acme,team/backend
+```
+
+The skill checks for duplicates and validates that the path is a git repository before writing. If a `url` is provided and the path does not exist yet, the repo will be cloned automatically on the first run.
+
+Remove a project:
+
+```
+/report-orchestrator remove-project name=MyApp
+```
+
+The skill asks for confirmation, then offers to delete the project's vault files (`Reports/MyApp/` and `Reports/Current/MyApp.md`). If you decline, the files stay in the vault as orphaned nodes.
+
 ### Already have an existing project?
 
 If your project has weeks or months of Git history, you don't start from scratch. Use `backfill` to generate all missing reports in one shot:
