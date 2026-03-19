@@ -195,18 +195,31 @@ List caught-up days in the final summary.
 
 ### 3a. Sync repo
 
-```bash
-# 1. If git_url is set and path does not exist yet: clone
-git clone <url> <path>
+Four cases, resolved in this order:
 
-# 2. If path exists and has a remote: pull
+```bash
+# Case 1 — remote-only (url set, path empty or absent)
+# Auto-managed bare clone in .cache/PROJECT.git — no working tree, blobs skipped
+CACHE_PATH=".cache/${name}.git"
+if [ ! -d "$CACHE_PATH" ]; then
+  git clone --bare --filter=blob:none "$url" "$CACHE_PATH"
+else
+  git --git-dir="$CACHE_PATH" fetch --filter=blob:none
+fi
+# Use CACHE_PATH as the git dir for all subsequent log commands:
+# git --git-dir="$CACHE_PATH" log $BRANCH_ARGS ...
+
+# Case 2 — url set, path exists: pull
+git -C "$path" pull
+
+# Case 3 — url not set, path exists, has a remote: pull
 HAS_REMOTE=$(git -C "$path" remote 2>/dev/null | head -1)
 [ -n "$HAS_REMOTE" ] && git -C "$path" pull
 
-# 3. If path exists and has no remote: skip sync silently (local-only repo)
+# Case 4 — local-only repo (no url, no remote): skip sync, read log directly
 ```
 
-Local repos without a remote are fully supported — the skill reads the git log directly without pulling.
+For Case 1, adapt all `git -C "$path"` log commands to `git --git-dir="$CACHE_PATH"` for this project.
 
 Resolve `$BRANCH_ARGS` for this project as described in Step 3 before extracting git log.
 
@@ -536,13 +549,19 @@ Steps:
 
 1. **Check for duplicates**: read `projects.config` and verify no line already starts with `name|`. If it exists, print an error and stop.
 
-2. **Validate path**: check that the path exists and is a git repository:
-```bash
-git -C "$path" rev-parse --is-inside-work-tree 2>/dev/null
+2. **Validate**: four valid combinations:
+
+| path | url | Behaviour |
+|---|---|---|
+| set, exists | optional | Local repo. Pulls if remote exists, skips otherwise. |
+| set, missing | set | Will be cloned to `path` on first run. |
+| empty/absent | set | Remote-only. Bare clone auto-managed in `.cache/NAME.git`. |
+| empty/absent | empty | Error — nothing to track. |
+
+For remote-only projects (no path), record an empty path in `projects.config`:
 ```
-- Path exists and is a git repo: OK — remote is optional, local-only repos are supported.
-- Path does not exist and `url` provided: OK — will be cloned on first run.
-- Path does not exist and no `url`: print an error and stop.
+NAME||https://github.com/org/repo|optional_branches|optional_tags
+```
 
 3. **Append to projects.config**: add the new line in the correct format:
 ```

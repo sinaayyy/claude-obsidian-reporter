@@ -86,14 +86,27 @@ Open Claude Code in the `claude-obsidian-reporter` directory (where `projects.co
 Add a project to the reporting:
 
 ```
+# Local repo (already on disk)
 /report-orchestrator add-project name=MyApp path=/home/user/projects/my-app
-/report-orchestrator add-project name=ClientX path=/repos/client url=https://github.com/org/client branches=main tags=client/acme,team/backend
+
+# Remote repo, already cloned
+/report-orchestrator add-project name=ClientX path=/repos/client branches=main tags=client/acme
+
+# Remote repo, not yet cloned (will clone on first run)
+/report-orchestrator add-project name=ApiService path=/repos/api url=https://github.com/org/api
+
+# Remote-only — no local clone needed
+/report-orchestrator add-project name=OssLib url=https://github.com/org/lib
 ```
 
-The skill checks for duplicates and validates the path before writing. `url` is optional:
-- **Local repo, no remote**: just provide `path`. No cloning or pulling — the skill reads the git log directly.
-- **Remote repo, already cloned**: provide `path`. The skill will `git pull` on each run.
-- **Remote repo, not yet cloned**: provide both `path` and `url`. The repo will be cloned automatically on the first run.
+The skill checks for duplicates and validates the configuration before writing. Four modes are supported:
+
+| Scenario | What happens |
+|---|---|
+| Local repo, no remote | Reads git log directly. No sync. |
+| Local repo with remote | `git pull` on each run. |
+| Remote, path provided | Clones to `path` on first run, then pulls. |
+| Remote-only (no path) | Bare clone auto-managed in `.cache/NAME.git`. Only history is downloaded, no file contents. |
 
 Remove a project:
 

@@ -10,3 +10,6 @@ projects.config
 # Contains GITHUB_TOKEN — never commit
 .env
 test-repos/
+
+# Bare clones for remote-only projects
+.cache/
