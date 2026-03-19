@@ -7,6 +7,10 @@
   },
   "colorGroups": [
     {
+      "query": "tag:#project",
+      "color": { "a": 1, "rgb": 6732650 }
+    },
+    {
       "query": "tag:#report/daily",
       "color": { "a": 1, "rgb": 4491519 }
     },
@@ -19,8 +23,8 @@
       "color": { "a": 1, "rgb": 16732754 }
     },
     {
-      "query": "tag:#project",
-      "color": { "a": 1, "rgb": 6732650 }
+      "query": "tag:#report/yearly",
+      "color": { "a": 1, "rgb": 11534336 }
     }
   ],
   "display": {

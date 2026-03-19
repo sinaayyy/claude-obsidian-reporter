@@ -119,7 +119,9 @@ Dashboard
             └── daily    ← daily reports
 ```
 
-Nodes are color-coded by type (daily / weekly / monthly / project) and grouped by project. To apply the pre-configured colors and forces, copy `graph.json` (at the root of this repo) to your vault's `.obsidian/` folder.
+Nodes are color-coded by type (daily / weekly / monthly / yearly / project) and grouped by project. To apply the pre-configured colors and forces, copy `graph.json` (at the root of this repo) to your vault's `.obsidian/` folder.
+
+> **Note:** Color groups are evaluated bottom-up in Obsidian — the last matching rule wins. `graph.json` puts `project` first so that report-type colors (daily, weekly, monthly, yearly) always take precedence over the project color.
 
 ## Vault structure
 
