@@ -162,8 +162,8 @@ while IFS='|' read -r name path url branches tags || [[ -n "$name" ]]; do
         warn "$name/$Y/$M/$(basename "$f") — unexpected file in month folder"
       done
 
-      # Walk W-N/
-      for week_dir in "$month_dir"/W-[0-9]; do
+      # Walk W-NN/ (ISO week numbers: W-01 to W-52, or within-month W-1 to W-5)
+      for week_dir in "$month_dir"/W-[0-9]*; do
         [[ -d "$week_dir" ]] || continue
         W=$(basename "$week_dir")
 
