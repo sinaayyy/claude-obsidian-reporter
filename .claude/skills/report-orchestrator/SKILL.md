@@ -5,7 +5,7 @@ allowed-tools: Bash, Read
 ---
 
 # report-orchestrator
-<description>End-of-day report skill: generates daily report for all projects, plus weekly on the configured end-of-week day, monthly on the last day of the month, and yearly on December 31 — all in one session.</description>
+<description>End-of-day report skill: generates daily, weekly, monthly, and yearly reports on every run (all overwritten with period-to-date commits). Structure: PROJECT/Y-YYYY/M-MM/W-NN/ with summary.md at each level and D-DD.md for daily.</description>
 <instructions>
 
 You are the end-of-day report orchestrator. You run entirely within this Claude session — no subprocesses, no background tasks.
@@ -21,25 +21,23 @@ You are the end-of-day report orchestrator. You run entirely within this Claude 
 ```
 Reports/
 ├── Current/
-│   └── PROJECT.md                              ← today's daily (overwritten on every run)
+│   └── PROJECT.md                    ← today's daily (overwritten on every run)
 └── PROJECT/
-    └── YYYY/                                   ← yearly folder
-        ├── PROJECT-YYYY.md                     ← yearly report (created Jan 1, overwritten every run, final on Dec 31)
-        └── MM/                            ← monthly folder
-            ├── PROJECT-YYYY-MM.md              ← monthly report (created on the 1st, overwritten every run, final on last day)
-            └── WNN/                            ← weekly folder
-                ├── PROJECT-WNN-YYYY.md         ← weekly report (created Monday, overwritten every run, final on WEEK_END_DAY)
-                └── Daily/
-                    ├── PROJECT-YYYY-MM-DD.md   ← daily (overwritten on each run for that day)
-                    └── ...
+    └── Y-YYYY/                       ← yearly folder
+        ├── summary.md         ← yearly report
+        └── M-MM/                     ← monthly folder
+            ├── summary.md       ← monthly report
+            └── W-NN/                 ← weekly folder
+                ├── summary.md   ← weekly report
+                └── D-DD.md           ← daily report (no project prefix needed)
 ```
 
 Examples:
 - `Reports/Current/ProjectAlpha.md`
-- `Reports/ProjectAlpha/2026/ProjectAlpha-2026.md`
-- `Reports/ProjectAlpha/2026/03/ProjectAlpha-2026-03.md`
-- `Reports/ProjectAlpha/2026/03/W12/ProjectAlpha-W12-2026.md`
-- `Reports/ProjectAlpha/2026/03/W12/Daily/ProjectAlpha-2026-03-18.md`
+- `Reports/ProjectAlpha/Y-2026/summary.md`
+- `Reports/ProjectAlpha/Y-2026/M-03/summary.md`
+- `Reports/ProjectAlpha/Y-2026/M-03/W-12/summary.md`
+- `Reports/ProjectAlpha/Y-2026/M-03/W-12/D-18.md`
 
 ## Step 1 — Resolve language and date
 
@@ -65,6 +63,7 @@ WEEK_START=$(date -d "$DATE - $(( DOW - 1 )) days" +%Y-%m-%d 2>/dev/null || date
 YEAR_MONTH=$(date -d "$DATE" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y-%m)
 YEAR=$(date -d "$DATE" +%Y 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y)
 MONTH=$(date -d "$DATE" +%m 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%m)
+DAY=$(date -d "$DATE" +%d 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%d)
 IS_WEEK_END=$([ "$DOW" = "$WEEK_END_DAY" ] && echo true || echo false)
 IS_LAST_DAY=$([ "$(date -d "$DATE" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y-%m)" != "$(date -d "$NEXT" +%Y-%m 2>/dev/null || date -j -f "%Y-%m-%d" "$NEXT" +%Y-%m)" ] && echo true || echo false)
 IS_LAST_YEAR=$([ "$(date -d "$DATE" +%Y 2>/dev/null || date -j -f "%Y-%m-%d" "$DATE" +%Y)" != "$(date -d "$NEXT" +%Y 2>/dev/null || date -j -f "%Y-%m-%d" "$NEXT" +%Y)" ] && echo true || echo false)
@@ -166,7 +165,7 @@ done
 
 For each day and each project, check if the daily report already exists:
 ```bash
-obsidian vault="VAULT" file path="Reports/PROJECT/YYYY/MM/WNN/Daily/PROJECT-PAST_DATE.md"
+obsidian vault="VAULT" file path="Reports/PROJECT/Y-YYYY/M-MM/W-NN/D-DD.md"
 ```
 
 If the file **exists**, check whether it is stale by comparing the actual commit count with the value stored in the report frontmatter:
@@ -177,7 +176,7 @@ ACTUAL=$(git -C "$path" log $BRANCH_ARGS \
   --pretty=format:"%h" --no-merges | wc -l | tr -d ' ')
 
 # Commits recorded in the existing report (read the file then grep nb_commits)
-RECORDED=$(obsidian vault="VAULT" read path="Reports/PROJECT/YYYY/MM/WNN/Daily/PROJECT-PAST_DATE.md" \
+RECORDED=$(obsidian vault="VAULT" read path="Reports/PROJECT/Y-YYYY/M-MM/W-NN/D-DD.md" \
   | grep -E "^nb_commits:" | awk '{print $2}')
 ```
 
@@ -268,91 +267,85 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{daily_links}}` | wikilinks to daily reports (weekly template only) |
 | `{{weekly_links}}` | wikilinks to weekly reports (monthly template only) |
 | `{{monthly_links}}` | wikilinks to monthly reports (yearly template only) |
-| `{{parent_weekly}}` | used as `parent` in the **daily** template — points to the weekly report — `PROJECT/YYYY/MM/WNN/PROJECT-WNN-YYYY` |
-| `{{parent_monthly}}` | used as `parent` in the **weekly** template — points to the monthly report — `PROJECT/YYYY/MM/PROJECT-YYYY-MM` |
-| `{{parent_yearly}}` | used as `parent` in the **monthly** template — points to the yearly report — `PROJECT/YYYY/PROJECT-YYYY` |
+| `{{parent_weekly}}` | used as `parent` in the **daily** template — points to the weekly summary — `PROJECT/Y-YYYY/M-MM/W-NN/summary` |
+| `{{parent_monthly}}` | used as `parent` in the **weekly** template — points to the monthly summary — `PROJECT/Y-YYYY/M-MM/summary` |
+| `{{parent_yearly}}` | used as `parent` in the **monthly** template — points to the yearly summary — `PROJECT/Y-YYYY/summary` |
 | `{{parent_project}}` | used as `parent` in the **yearly** template — points to the project index — `PROJECT/PROJECT` |
 
-**Placeholder values to fill in (replace PROJECT, YYYY-MM, WNN, YYYY with actual values):**
+**Placeholder values to fill in (replace PROJECT, Y-YYYY, M-MM, W-NN with actual values):**
 
 | Placeholder | Value |
 |---|---|
-| `{{parent_weekly}}` | `PROJECT/YYYY/MM/WNN/PROJECT-WNN-YYYY` |
-| `{{parent_monthly}}` | `PROJECT/YYYY/MM/PROJECT-YYYY-MM` |
-| `{{parent_yearly}}` | `PROJECT/YYYY/PROJECT-YYYY` |
+| `{{parent_weekly}}` | `PROJECT/Y-YYYY/M-MM/W-NN/summary` |
+| `{{parent_monthly}}` | `PROJECT/Y-YYYY/M-MM/summary` |
+| `{{parent_yearly}}` | `PROJECT/Y-YYYY/summary` |
 | `{{parent_project}}` | `PROJECT/PROJECT` |
 
 **Daily** (always):
 
 Paths:
-- `Reports/PROJECT/YYYY/MM/WNN/Daily/PROJECT-DATE.md`  ← archived in weekly folder
+- `Reports/PROJECT/Y-YYYY/M-MM/W-NN/D-DD.md`  ← archived in weekly folder
 - `Reports/Current/PROJECT.md`                               ← always the latest daily (overwritten)
 
 Commands:
 ```bash
-obsidian vault="VAULT" create path="Reports/PROJECT/YYYY/MM/WNN/Daily/PROJECT-DATE.md" content="..." overwrite
-obsidian vault="VAULT" create path="Reports/Current/PROJECT.md" content="[[PROJECT/YYYY/MM/WNN/Daily/PROJECT-DATE]]" overwrite
+obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/M-MM/W-NN/D-DD.md" content="..." overwrite
+obsidian vault="VAULT" create path="Reports/Current/PROJECT.md" content="[[PROJECT/Y-YYYY/M-MM/W-NN/D-DD]]" overwrite
 ```
 
 **Weekly** (always — overwritten every run with week-to-date commits):
 
-Path: `Reports/PROJECT/YYYY/MM/WNN/PROJECT-WNN-YYYY.md`
+Path: `Reports/PROJECT/Y-YYYY/M-MM/W-NN/summary.md`
 
 For `{{daily_links}}`, generate one wikilink per day that had commits this week:
 ```
-- [[PROJECT/YYYY/MM/WNN/Daily/PROJECT-DATE|DATE]]
+- [[PROJECT/Y-YYYY/M-MM/W-NN/D-DD|DATE]]
 ```
 
 Command:
 ```bash
-obsidian vault="VAULT" create path="Reports/PROJECT/YYYY/MM/WNN/PROJECT-WNN-YYYY.md" content="..." overwrite
+obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/M-MM/W-NN/summary.md" content="..." overwrite
 ```
 
 **Monthly** (always — overwritten every run with month-to-date commits):
 
 First write the monthly report:
 
-Path: `Reports/PROJECT/YYYY/MM/PROJECT-YYYY-MM.md`
+Path: `Reports/PROJECT/Y-YYYY/M-MM/summary.md`
 
 For `{{weekly_links}}`, generate one wikilink per week that had commits this month:
 ```
-- [[PROJECT/YYYY/MM/WNN/PROJECT-WNN-YYYY|Week WNN]]
+- [[PROJECT/Y-YYYY/M-MM/W-NN/summary|Week W-NN]]
 ```
 
 Command:
 ```bash
-obsidian vault="VAULT" create path="Reports/PROJECT/YYYY/MM/PROJECT-YYYY-MM.md" content="..." overwrite
+obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/M-MM/summary.md" content="..." overwrite
 ```
 
 **Yearly** (always — overwritten every run with year-to-date commits):
 
-Path: `Reports/PROJECT/YYYY/PROJECT-YYYY.md`
+Path: `Reports/PROJECT/Y-YYYY/summary.md`
 
 For `{{monthly_links}}`, generate one wikilink per month that had commits this year:
 ```
-- [[PROJECT/YYYY/MM/PROJECT-YYYY-MM|Month YYYY-MM]]
+- [[PROJECT/Y-YYYY/M-MM/summary|Month M-MM]]
 ```
 
 Command:
 ```bash
-obsidian vault="VAULT" create path="Reports/PROJECT/YYYY/PROJECT-YYYY.md" content="..." overwrite
+obsidian vault="VAULT" create path="Reports/PROJECT/Y-YYYY/summary.md" content="..." overwrite
 ```
 
-Then update (or create) the project index at `Reports/PROJECT/PROJECT.md`. Always overwrite it so it stays in sync — collect **all years**, **all months**, and **all weeks** ever generated for this project by reading existing report files:
+Then update (or create) the project index at `Reports/PROJECT/PROJECT.md`. Always overwrite it so it stays in sync — list all yearly folders:
 
 ```bash
-# List all yearly reports for this project
-obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "PROJECT-[0-9]\{4\}\.md"
-
-# List all monthly reports for this project
-obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "PROJECT-[0-9]\{4\}-[0-9]\{2\}\.md"
-
-# List all weekly reports for this project
-obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "PROJECT-W[0-9]\{2\}-[0-9]\{4\}\.md"
+# List all yearly folders for this project
+obsidian vault="VAULT" files folder="Reports/PROJECT" | grep "Y-[0-9]\{4\}/summary\.md"
 ```
 
 Build the project index content with:
-- One `[[PROJECT/YYYY/PROJECT-YYYY|Year YYYY]]` link per year found, sorted newest first
+- One `[[PROJECT/Y-YYYY/summary|Y-YYYY]]` link per year found, sorted newest first
 
 ```bash
 obsidian vault="VAULT" create path="Reports/PROJECT/PROJECT.md" content="---
@@ -366,7 +359,7 @@ parent: \"[[Dashboard]]\"
 
 ## Yearly Reports
 
-- [[PROJECT/YYYY/PROJECT-YYYY|YYYY]]
+- [[PROJECT/Y-YYYY/summary|Y-YYYY]]
 - ..." overwrite
 ```
 

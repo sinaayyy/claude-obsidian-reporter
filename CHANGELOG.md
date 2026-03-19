@@ -6,6 +6,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [3.0.0] — 2026-03-19
+
+### Added
+- **Yearly reports** — `summary.md` generated at `Y-YYYY/` level, auto-triggered on Dec 31 (or updated every run with year-to-date commits); yearly template added
+- **`report/yearly` tag** — new base tag for graph coloring
+- **`DAY`, `MONTH` variables** — added alongside existing `YEAR`, `WEEK_NUM` for uniform path building
+- **`D-DD.md` daily files** — daily reports no longer prefixed with project name (path provides full context)
+
+### Changed
+- **New vault structure** — fully uniform `Y-YYYY/M-MM/W-NN/` folder naming; all aggregate reports renamed to `summary.md`; daily files are `D-DD.md`
+- **Hierarchy extended** — `parent` chain is now Daily → Weekly → Monthly → Yearly → Project index → Dashboard
+- **All four report types run on every run** — weekly, monthly, and yearly are now always overwritten with period-to-date commits (not only at period end); `IS_WEEK_END`/`IS_LAST_DAY`/`IS_LAST_YEAR` retained for catchup only
+- **Project index** — now links only to yearly summaries (`Y-YYYY/summary`); navigation down to months/weeks/days is done via parent links
+- **Stale report detection** — catchup now compares actual git commit count vs `nb_commits` in frontmatter instead of simple file-exists check; stale reports are regenerated
+- **Graph color order fixed** — `colorGroups` reordered so report-type colors (daily/weekly/monthly/yearly) take priority over project color (first match wins in Obsidian)
+- **Skip empty reports** — reports with 0 commits are never written at any level, avoiding detached nodes in the graph
+
+### Fixed
+- Reports generated after working late were missed on next catchup — stale check now catches them
+- `project` tag was overriding report-type colors in graph view — fixed by moving it last in `colorGroups`
+- Monthly `parent` was pointing to project index instead of yearly report
+
+---
+
 ## [2.0.0] — 2026-03-16
 
 ### Added
