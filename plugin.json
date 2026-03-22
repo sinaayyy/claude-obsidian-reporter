@@ -1,7 +1,7 @@
 {
   "name": "claude-obsidian-reporter",
-  "version": "2.0.0",
-  "description": "End-of-day Claude Code skill that tracks your Git activity and writes structured daily, weekly, and monthly reports into your Obsidian vault.",
+  "version": "3.1.0",
+  "description": "End-of-day Claude Code skill that tracks your Git activity and writes structured daily, weekly, monthly, and yearly reports into your Obsidian vault — with charts, health indicators, and contributor tracking.",
   "author": "sinaayyy",
   "homepage": "https://github.com/sinaayyy/claude-obsidian-reporter",
   "repository": "https://github.com/sinaayyy/claude-obsidian-reporter",
@@ -13,7 +13,12 @@
     "daily-notes",
     "weekly-review",
     "productivity",
-    "worklog"
+    "worklog",
+    "enterprise",
+    "dashboard",
+    "kpi",
+    "contributor-tracking",
+    "project-health"
   ],
   "skills": [
     ".claude/skills/report-orchestrator"

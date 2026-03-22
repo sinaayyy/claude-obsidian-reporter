@@ -20,8 +20,9 @@ You are the end-of-day report orchestrator. You run entirely within this Claude 
 - `add-project`: add a project to `projects.config`: see [Add-project mode](#add-project-mode)
 - `remove-project`: remove a project from `projects.config`: see [Remove-project mode](#remove-project-mode)
 - `discover`: scan local directories for git repos not yet in `projects.config`: see [Discover mode](#discover-mode)
+- `status`: show the reporting status of every tracked project directly from the vault: see [Status mode](#status-mode)
 
-If any of `check`, `fix`, `add-project`, `remove-project`, `discover` is present, **skip the normal report flow entirely** and jump to the corresponding mode.
+If any of `check`, `fix`, `add-project`, `remove-project`, `discover`, `status` is present, **skip the normal report flow entirely** and jump to the corresponding mode.
 
 ## Vault structure
 
@@ -226,6 +227,31 @@ Resolve `$BRANCH_ARGS` for this project as described in Step 3 before extracting
 
 ### 3b. Extract git log
 
+For each period, after extracting the commit list, also extract:
+
+```bash
+# Contributors for the period (distinct author names, YAML inline array)
+CONTRIBUTORS_RAW=$(git -C "$path" log $BRANCH_ARGS --after="..." --before="..." \
+  --no-merges --pretty=format:"%an" | sort -u)
+# Format as YAML inline array: ["Alice", "Bob"]
+CONTRIBUTORS_YAML=$(echo "$CONTRIBUTORS_RAW" | awk 'BEGIN{printf "["} NR>1{printf ", "} {printf "\"%s\"", $0} END{print "]"}')
+
+# Diff stats for the period
+STAT_LINE=$(git -C "$path" log $BRANCH_ARGS --after="..." --before="..." \
+  --no-merges --shortstat --pretty=format:"" | grep -E "file" | tail -1)
+FILES_CHANGED=$(echo "$STAT_LINE" | grep -oE "[0-9]+ file" | grep -oE "^[0-9]+")
+INSERTIONS=$(echo "$STAT_LINE" | grep -oE "[0-9]+ insertion" | grep -oE "^[0-9]+")
+DELETIONS=$(echo "$STAT_LINE" | grep -oE "[0-9]+ deletion" | grep -oE "^[0-9]+")
+FILES_CHANGED="${FILES_CHANGED:-0}"
+INSERTIONS="${INSERTIONS:-0}"
+DELETIONS="${DELETIONS:-0}"
+
+# Timestamp of generation
+GENERATED_AT=$(date -Iseconds 2>/dev/null || date -u +"%Y-%m-%dT%H:%M:%S")
+```
+
+These values fill `{{contributors}}`, `{{files_changed}}`, `{{insertions}}`, `{{deletions}}`, `{{generated_at}}` for the current report. Replace `...` with the actual after/before bounds for each period.
+
 **Daily**: commits on `$DATE`:
 ```bash
 git -C "$path" log $BRANCH_ARGS --after="${DATE}T00:00:00" --before="${DATE}T23:59:59" \
@@ -242,6 +268,15 @@ git -C "$path" log $BRANCH_ARGS --after="${WEEK_START}T00:00:00" --before="${DAT
 ```bash
 git -C "$path" log $BRANCH_ARGS --after="${YEAR_MONTH}-01T00:00:00" --before="${DATE}T23:59:59" \
   --pretty=format:"- %s (%h) by %an" --no-merges
+```
+
+**Monthly chart data** (for `{{chart_monthly_labels}}` / `{{chart_monthly_data}}`):
+```bash
+# Commit count per day of the current month
+git -C "$path" log $BRANCH_ARGS --after="${YEAR_MONTH}-01T00:00:00" --before="${DATE}T23:59:59" \
+  --no-merges --pretty=format:"%ad" --date=format:"%d" | sort | uniq -c
+# Build two arrays: labels = ["01","02",...], data = [N,N,...]
+# Fill 0 for days with no commits up to today
 ```
 
 **Yearly**: commits from Jan 1 of the year to `$DATE`:
@@ -293,7 +328,13 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{week}}` | ISO week number (e.g. 12) |
 | `{{month}}` | YYYY-MM |
 | `{{year}}` | YYYY |
-| `{{nb_commits}}` | commit count |
+| `{{nb_commits}}` | commit count for the period |
+| `{{files_changed}}` | number of files changed in the period (integer, 0 if none) |
+| `{{insertions}}` | lines inserted in the period (integer, 0 if none) |
+| `{{deletions}}` | lines deleted in the period (integer, 0 if none) |
+| `{{contributors}}` | YAML inline array of distinct author names for the period: `["Alice", "Bob"]` |
+| `{{branches}}` | YAML inline array of active branches for this project: e.g. `["main", "develop"]` |
+| `{{generated_at}}` | ISO-8601 timestamp of report generation: `2026-03-22T18:30:00+01:00` |
 | `{{status}}` | `success` |
 | `{{liste_commits}}` | formatted commit list (never empty: reports with 0 commits are not written) |
 | `{{resume_taches}}` | prose summary in `$LANGUAGE`: **single line, no newlines** (rendered inside a `> [!summary]` callout): tone and abstraction scale strictly with level: **daily** = terse, first-person, task movement ("shipped X", "investigating Y", "blocked on Z"): 2-3 sentences, subject is *I*; **weekly** = professional, team-level framing, individual tasks compressed into outcomes ("the team delivered X", "carried over Y due to Z"): 2-3 sentences, subject is *the team*; **monthly** = measured, data-grounded, outcome vs. plan framing, trends and risks surfacing ("delivery was on track / behind, tech debt in area X is accumulating"): 3-4 sentences, subject is *the workstream*; **yearly** = narrative and reflective, thematic not chronological, acknowledges difficulty alongside wins ("the year was defined by X, we built Y, we learned Z"): 3-5 sentences, subject is *the project* |
@@ -302,7 +343,12 @@ Fill in the `{{placeholder}}` variables from each template with the actual value
 | `{{first_commit}}` | earliest commit date across all time (YYYY-MM-DD): project index only |
 | `{{total_commits}}` | total commit count across all time: project index only |
 | `{{active_years}}` | comma-separated years with at least one commit: project index only |
-| `{{contributors}}` | comma-separated distinct author names: project index only |
+| `{{health}}` | `green`, `yellow`, or `red`: project index only — computed in Step 6c |
+| `{{health_details}}` | one-line health summary: e.g. `"142 commits (30d) \| 3 contributors \| velocity +12%"`: project index only |
+| `{{chart_monthly_labels}}` | JSON array of day strings for monthly chart: `["01","02",...,"22"]` |
+| `{{chart_monthly_data}}` | JSON array of commit counts per day: `[3,0,5,...]` |
+| `{{chart_lifetime_labels}}` | JSON array of YYYY-MM strings for project-index lifetime chart |
+| `{{chart_lifetime_data}}` | JSON array of commit counts per month for project-index lifetime chart |
 | `{{daily_links}}` | wikilinks to daily reports (weekly template only) |
 | `{{weekly_links}}` | wikilinks to weekly reports (monthly template only) |
 | `{{monthly_links}}` | wikilinks to monthly reports (yearly template only) |
@@ -390,8 +436,16 @@ TOTAL_COMMITS=$(git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%h"
 # Active years (distinct years with at least one commit)
 ACTIVE_YEARS=$(git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%ad" --date=format:"%Y" | sort -u | tr '\n' ',' | sed 's/,$//')
 
-# Contributors (distinct author names)
+# Contributors (distinct author names, all time)
 CONTRIBUTORS=$(git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%an" | sort -u | tr '\n' ',' | sed 's/,$//')
+# Format as YAML inline array for frontmatter
+CONTRIBUTORS_YAML=$(git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%an" | sort -u | awk 'BEGIN{printf "["} NR>1{printf ", "} {printf "\"%s\"", $0} END{print "]"}')
+
+# Lifetime chart data: commits per month (for chart_lifetime_labels / chart_lifetime_data)
+# Extract YYYY-MM for each commit, count per month, build arrays
+git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%ad" --date=format:"%Y-%m" | sort | uniq -c
+# Build: chart_lifetime_labels = ["2024-01","2024-02",...] (all months with commits)
+# Build: chart_lifetime_data = [N, N, ...] (commit count per month, matching labels)
 ```
 
 Then scan the vault for existing yearly report files and build one link per year, newest first:
@@ -409,7 +463,12 @@ Load `Templates/project-index-template.md` and fill in all placeholders:
 | `{{first_commit}}` | earliest commit date (YYYY-MM-DD) |
 | `{{total_commits}}` | total commit count across all time |
 | `{{active_years}}` | comma-separated list of years with commits (e.g. `2024, 2025, 2026`) |
-| `{{contributors}}` | comma-separated list of distinct author names |
+| `{{contributors}}` | YAML inline array of distinct author names (all time): `["Alice", "Bob"]` |
+| `{{health}}` | `green`, `yellow`, or `red` — computed in Step 6c |
+| `{{health_details}}` | one-line health summary — computed in Step 6c |
+| `{{generated_at}}` | ISO-8601 timestamp of generation |
+| `{{chart_lifetime_labels}}` | JSON array of YYYY-MM strings for months with commits |
+| `{{chart_lifetime_data}}` | JSON array of commit counts per month (matching labels) |
 | `{{resume_taches}}` | essay-style narrative in `$LANGUAGE` describing what this project is and what it has built over its lifetime: tone is reflective and human, written as if onboarding a future team member ("this project started as X, grew into Y, its core purpose is Z"): **single line, no newlines**, 3-5 sentences, subject is *the project* |
 | `{{highlights}}` | 5-8 named milestones or turning points across the project's entire lifetime: one bullet per line, each starting with `> - `: compress each to a one-sentence outcome with impact ("shipped auth rewrite: reduced login errors by 80%", "migrated to monorepo: unified 3 repos into one") |
 | `{{yearly_links}}` | one `- [[PROJECT/Y-YYYY/Y-YYYY\|Y-YYYY]]` per year found, newest first |
@@ -422,6 +481,77 @@ obsidian vault="VAULT" create path="Reports/PROJECT/PROJECT.md" content="<filled
 
 After all projects have been processed, always overwrite `Reports/Dashboard.md` with a fresh cross-project summary.
 
+### Step 6b: Compute chart data for the Dashboard
+
+Before filling the dashboard template, compute the following from git log across all projects:
+
+**Bar chart — commits per day over the last 30 days (per project):**
+```bash
+START_30D=$(date -d "$DATE - 30 days" +%Y-%m-%d 2>/dev/null || date -j -v-30d -f "%Y-%m-%d" "$DATE" +%Y-%m-%d)
+# For each project, count commits per day:
+git -C "$path" log $BRANCH_ARGS --after="${START_30D}T00:00:00" --before="${DATE}T23:59:59" \
+  --no-merges --pretty=format:"%ad" --date=format:"%Y-%m-%d" | sort | uniq -c
+# Build: chart_labels_30d = ["YYYY-MM-DD", ...] (every day in range, 30 entries)
+# Build: chart_series_30d = one "- title: PROJECT\n  data: [N,N,...]" entry per project
+```
+
+**Line chart — total commits per week over last 8 weeks:**
+```bash
+# For each of the last 8 ISO weeks, sum commits across all projects
+# Build: chart_labels_8w = ["W-15", "W-16", ...] (8 entries)
+# Build: chart_data_8w = [total_commits_per_week, ...]
+```
+
+**Pie chart — total commits per project over 30 days:**
+```bash
+# Sum all commits per project in the 30-day window
+# Build: chart_pie_labels = ["ProjectAlpha", "ProjectBeta", ...]
+# Build: chart_pie_data = [N, N, ...]
+```
+
+Format all arrays as compact JSON arrays: `[3, 0, 5, 1]`. For bar chart series, format each project as:
+```
+  - title: ProjectAlpha
+    data: [3, 0, 5, ...]
+```
+
+### Step 6c: Compute project health indicators
+
+For each project, compute a health score. Store results to fill `{{health_overview}}` in the dashboard and `{{health}}` / `{{health_details}}` in the project-index:
+
+```bash
+# Days since last commit
+LAST_COMMIT_DATE=$(git -C "$path" log $BRANCH_ARGS --no-merges --pretty=format:"%ad" --date=format:"%Y-%m-%d" | head -1)
+DAYS_SINCE=$(( ( $(date -d "$DATE" +%s) - $(date -d "$LAST_COMMIT_DATE" +%s) ) / 86400 ))
+
+# Commit count this week vs 4-week average
+COMMITS_THIS_WEEK=$(git -C "$path" log $BRANCH_ARGS --after="${WEEK_START}T00:00:00" --before="${DATE}T23:59:59" --no-merges --pretty=format:"%h" | wc -l | tr -d ' ')
+COMMITS_30D=$(git -C "$path" log $BRANCH_ARGS --after="${START_30D}T00:00:00" --before="${DATE}T23:59:59" --no-merges --pretty=format:"%h" | wc -l | tr -d ' ')
+AVG_WEEKLY=$(( COMMITS_30D / 4 ))
+
+# Distinct contributors last 30 days
+CONTRIB_COUNT=$(git -C "$path" log $BRANCH_ARGS --after="${START_30D}T00:00:00" --before="${DATE}T23:59:59" --no-merges --pretty=format:"%an" | sort -u | wc -l | tr -d ' ')
+```
+
+**Health scoring rules:**
+- `red` if: `DAYS_SINCE > 30` OR (`AVG_WEEKLY > 5` AND `COMMITS_THIS_WEEK < AVG_WEEKLY / 2`)
+- `yellow` if: `DAYS_SINCE > 7` OR `CONTRIB_COUNT == 1` OR thin commit rate > 40% (reuse existing detection)
+- `green` otherwise
+
+**Health details string** (for `{{health_details}}`):
+```
+"{{COMMITS_30D}} commits (30d) | {{CONTRIB_COUNT}} contributor(s) | last commit {{DAYS_SINCE}}d ago"
+```
+
+**`{{health_overview}}` for the dashboard** — one callout per project, using Obsidian callout types:
+- `green` → `> [!success] ProjectName — On track`
+- `yellow` → `> [!warning] ProjectName — Attention`
+- `red` → `> [!danger] ProjectName — Stale`
+
+Each callout body: `> {{health_details}}`
+
+### Step 6d: Fill and write Dashboard
+
 Load `Templates/dashboard-template.md` and fill in:
 
 | Placeholder | Value |
@@ -429,7 +559,14 @@ Load `Templates/dashboard-template.md` and fill in:
 | `{{date}}` | today's date (YYYY-MM-DD) |
 | `{{workspace_summary}}` | 2-3 sentences synthesizing activity across **all** projects for the current week: what is the overall focus, what moved forward, any notable pattern: **single line, no newlines** |
 | `{{workspace_highlights}}` | one bullet per active project with a one-line status, each starting with `> - **PROJECT**: `: e.g. `> - **MyApp**: shipped auth refactor, 8 commits` |
+| `{{health_overview}}` | callouts computed in Step 6c, one per project |
 | `{{projects_overview}}` | one block per project, based on reading each project index (`Reports/PROJECT/PROJECT.md`): project name as a wikilink header, then 2-3 sentences covering what the project is, its total commit span, and the main themes from the project index essay. Tone: timeless, factual. One blank line between projects. |
+| `{{chart_labels_30d}}` | JSON array of date strings (30 entries) |
+| `{{chart_series_30d}}` | YAML block with one series per project |
+| `{{chart_labels_8w}}` | JSON array of week labels (8 entries) |
+| `{{chart_data_8w}}` | JSON array of total commits per week |
+| `{{chart_pie_labels}}` | JSON array of project names |
+| `{{chart_pie_data}}` | JSON array of commit counts |
 
 ```bash
 obsidian vault="VAULT" create path="Reports/Dashboard.md" content="<filled template>" overwrite
@@ -542,88 +679,227 @@ After all fixes are applied, re-run `bash scripts/check-vault.sh` and print the 
 
 Triggered by `/report-orchestrator discover`.
 
-Scans local directories for git repositories that are not yet tracked in `projects.config`, then offers to add them interactively.
+Shows the full vault picture in one view: tracked projects with their vault status, and any untracked repos found on disk. Lets the user pick which untracked repos to add and ask from when to start tracking each one.
 
 ### 1. Resolve scan paths
-
-Read `DISCOVER_PATHS` from `.env`. If not set, use defaults:
 
 ```bash
 DISCOVER_PATHS=$(grep -E "^DISCOVER_PATHS=" .env 2>/dev/null | cut -d= -f2 | tr -d ' ')
 DISCOVER_PATHS="${DISCOVER_PATHS:-$HOME/projects:$HOME/repos:$HOME/code:$HOME/workspace:$HOME/dev}"
 ```
 
-### 2. Find git repositories
+### 2. Load tracked projects and their vault status
 
-For each path in `DISCOVER_PATHS` (colon-separated), search recursively up to depth 4 for `.git` directories:
+Read `projects.config` (skip comment lines). For each tracked project:
+
+```bash
+# Last report date: read the Current/ pointer, extract date from the wikilink path (D-DD in W-NN in M-MM in Y-YYYY)
+CURRENT=$(obsidian vault="VAULT" read path="Reports/Current/PROJECT.md" 2>/dev/null)
+# The file contains a wikilink like [[PROJECT/Y-2026/M-03/W-12/D-22]] — extract the date from it
+
+# Health: read from project-index frontmatter
+HEALTH=$(obsidian vault="VAULT" read path="Reports/PROJECT/PROJECT.md" 2>/dev/null | grep -E "^health:" | awk '{print $2}')
+```
+
+Derive `last_report_date` by parsing the wikilink in `Current/PROJECT.md`:
+- Pattern `Y-YYYY/M-MM/W-NN/D-DD` → reconstruct as `YYYY-MM-DD`
+- If `Current/PROJECT.md` does not exist → `never`
+
+`health` values: `green`, `yellow`, `red`, or `—` if no project-index yet.
+
+### 3. Find untracked git repositories
+
+For each path in `DISCOVER_PATHS` (colon-separated), scan recursively up to depth 4:
 
 ```bash
 find "$scan_dir" -maxdepth 4 -name ".git" -type d 2>/dev/null | sed 's|/.git$||'
 ```
 
 Exclude:
-- The `claude-obsidian-reporting` directory itself (where this tool lives)
+- The `claude-obsidian-reporting` directory itself
 - Any path inside `.cache/` (bare clones managed by this tool)
 - Paths already in `projects.config` (compare by resolved absolute path)
-- Submodules (a `.git` file, not a `.git` directory, indicates a submodule — skip it)
+- Submodules (`.git` file, not directory)
 
-### 3. Collect already-tracked paths
-
-Read `projects.config` and extract the path column (2nd field). Resolve to absolute paths for comparison.
-
-### 4. Present results
-
-For each repo, gather metadata:
+For each untracked repo, gather:
 ```bash
-git -C "$repo" log --oneline 2>/dev/null | wc -l                           # commit count
+git -C "$repo" log --oneline --no-merges 2>/dev/null | wc -l               # commit count
 git -C "$repo" log -1 --format="%ad" --date=format:"%Y-%m-%d" 2>/dev/null  # last commit date
-git -C "$repo" remote get-url origin 2>/dev/null                            # remote URL if any
+git -C "$repo" log --reverse --format="%ad" --date=format:"%Y-%m-%d" 2>/dev/null | head -1  # first commit date
+git -C "$repo" remote get-url origin 2>/dev/null                            # remote URL
 git -C "$repo" symbolic-ref --short HEAD 2>/dev/null                        # default branch
 ```
 
-Derive the suggested project name from the directory basename (keep original casing and hyphens).
+Derive the suggested project name from the directory basename.
 
-Print a numbered list showing suggested name, path, branch, last commit date, and commit count:
+### 4. Print the full vault overview
+
+Always print both sections, even if one is empty.
 
 ```
-Discovered 5 untracked git repositories:
+╔══════════════════════════════════════════════════════════════════════╗
+║  discover — vault overview                                           ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  Tracked projects (5)                                                ║
+║                                                                      ║
+║    SAFARI               last report: 2026-03-22   health: green      ║
+║    claude-obsidian      last report: 2026-03-22   health: green      ║
+║    event-rental         last report: 2026-03-22   health: yellow     ║
+║    event-pool           last report: never        health: —          ║
+║    yanisbardes.github   last report: 2026-03-22   health: green      ║
+║                                                                      ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  Untracked repos found (3)                                           ║
+║                                                                      ║
+║   1. my-app        /home/user/projects/my-app      [main]  2026-03-18  142 commits  (since 2024-01-15) ║
+║   2. client-x      /home/user/projects/client-x    [main]  2026-02-28   67 commits  (since 2025-06-01) ║
+║   3. side-project  /home/user/repos/side-project   [main]  2025-11-01   23 commits  (since 2025-08-12) ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
 
-  1. my-app        /home/user/projects/my-app       [main]   2026-03-18  142 commits
-  2. client-x      /home/user/projects/client-x     [main]   2026-02-28   67 commits
-  3. side-project  /home/user/repos/side-project    [main]   2025-11-01   23 commits
-  4. scripts       /home/user/code/scripts          [master] 2026-01-10    8 commits
-  5. proto         /home/user/dev/experiments/proto [dev]    2024-06-15    3 commits
-
-Add which repos? (e.g. 1 3 5), "all", or press Enter to skip:
+Add which repos? (numbers like "1 3", "all", or Enter to skip):
 ```
 
-If none are found, print "No untracked git repositories found in the scan paths." and stop.
+If no untracked repos are found, print the tracked section only and end with:
+```
+No untracked git repositories found in the scan paths.
+```
 
-### 5. Add selected repos
+### 5. Add selected repos — ask backfill date per repo
 
-For each selected repo, write a line to `projects.config` using all auto-detected values:
-- name: suggested name from step 4
+For each selected repo (in selection order), ask individually:
+
+```
+Track my-app (142 commits since 2024-01-15):
+  Backfill from when?  [all | YYYY-MM-DD | Enter = today only]
+  >
+```
+
+- `all` → backfill from first commit date
+- `YYYY-MM-DD` → backfill from that date
+- Enter (empty) → no backfill, today's report only
+
+Store the backfill answer per repo. Then write each repo to `projects.config`:
+- name: suggested name
 - path: absolute path
 - url: remote origin URL if detected (empty otherwise)
-- branches: default branch detected in step 4
+- branches: default branch
 
 Use the same duplicate-check and write logic as [Add-project mode](#add-project-mode).
 
-Print a confirmation line for each repo added:
+Print a confirmation line per repo added:
 ```
-Added: my-app | /home/user/projects/my-app | https://github.com/user/my-app | main |
-```
-
-### 6. Offer to run reports immediately
-
-After all repos are added, ask:
-
-```
-Added 3 project(s) to projects.config.
-Run today's report for these projects now? (yes/no)
+Added: my-app | /home/user/projects/my-app | https://github.com/user/my-app | main |  (backfill: all)
+Added: client-x | /home/user/projects/client-x |  | main |  (backfill: 2025-09-01)
+Added: side-project | /home/user/repos/side-project |  | main |  (backfill: today only)
 ```
 
-If yes: run the full report flow restricted to the newly added projects only. This gives instant vault coverage without a separate command.
+### 6. Run reports immediately
+
+After all repos are written to `projects.config`, for each newly added project:
+
+- If backfill was `all` or a date → run the full report flow with `backfill=<value>` for that project only
+- If no backfill → run today's report only for that project
+
+Print progress using the same `[step N]` format as the normal flow. When all are done, print the standard summary box.
+
+---
+
+## Status mode
+
+Triggered by `/report-orchestrator status`.
+
+Reads the vault — no git operations, no writes. Shows the current reporting state of every tracked project: last report date, health, coverage, and contributors. Useful for a quick morning check or before presenting reports to stakeholders.
+
+### 1. Load tracked projects
+
+Read `projects.config` (skip comment lines). Build the list of project names.
+
+Read `VAULT_NAME` from `.env`:
+```bash
+VAULT_NAME=$(grep -E "^VAULT_NAME=" .env | cut -d= -f2 | tr -d ' ')
+```
+
+### 2. For each project, read vault data
+
+**Last report date** — read `Reports/Current/PROJECT.md` and parse the wikilink:
+```bash
+obsidian vault="VAULT" read path="Reports/Current/PROJECT.md"
+# Content: [[PROJECT/Y-2026/M-03/W-12/D-22]]
+# Extract Y, M, D from path segments to reconstruct YYYY-MM-DD
+```
+If file does not exist → `last_report = never`.
+
+**Project-index frontmatter** — read `Reports/PROJECT/PROJECT.md`:
+```bash
+obsidian vault="VAULT" read path="Reports/PROJECT/PROJECT.md"
+```
+Extract from frontmatter:
+- `health` → `green` / `yellow` / `red` / `—` if missing
+- `total_commits` → integer or `—`
+- `contributors` → list (count the entries)
+- `first_commit` → YYYY-MM-DD or `—`
+- `generated_at` → last time the index was regenerated
+
+If project-index does not exist → all fields are `—`, health = `—`.
+
+**Report counts** — count existing report files per type by listing the vault folder:
+```bash
+obsidian vault="VAULT" files folder="Reports/PROJECT"
+# Count files matching: D-*.md (daily), W-*.md (weekly), M-*.md (monthly), Y-*.md (yearly)
+```
+
+**Days since last report** — compute from `last_report` date to today. If `never` → `—`.
+
+### 3. Print the status table
+
+```
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║  status — reporting overview                vault: MyNotes   projects: 5     ║
+╠═════════════════════════╦═════════╦═══════════╦════════════╦═══════╦═════════╣
+║  Project                ║ Health  ║ Last rpt  ║  Since     ║ Cmt.  ║ Contrib ║
+╠═════════════════════════╬═════════╬═══════════╬════════════╬═══════╬═════════╣
+║  SAFARI                 ║ ● green ║ 2026-03-22║ 2024-01-10 ║   88  ║    3    ║
+║  claude-obsidian        ║ ● green ║ 2026-03-22║ 2026-03-14 ║   61  ║    1    ║
+║  event-rental           ║ ●yellow ║ 2026-03-22║ 2025-02-01 ║  145  ║    2    ║
+║  event-pool             ║  —      ║ never     ║     —      ║    —  ║    —    ║
+║  yanisbardes.github.io  ║ ● green ║ 2026-03-22║ 2024-09-03 ║   24  ║    1    ║
+╠═════════════════════════╩═════════╩═══════════╩════════════╩═══════╩═════════╣
+║  5 projects  ·  3 green  ·  1 yellow  ·  0 red  ·  1 never reported          ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+```
+
+Column descriptions:
+- **Health** — from project-index frontmatter. Prefix with `●` colored indicator: `green` → `● green`, `yellow` → `● yellow`, `red` → `● red`, missing → `—`
+- **Last rpt** — date of the last daily report written to vault (from `Current/PROJECT.md`)
+- **Since** — first commit date tracked (`first_commit` from project-index)
+- **Cmt.** — `total_commits` from project-index (all-time)
+- **Contrib** — number of distinct contributors (count entries in `contributors` array from project-index)
+
+Footer line counts: total projects, count per health value, and count with `never` as last report.
+
+### 4. Detail section — stale and never-reported projects
+
+After the table, if any project has health `red` or `yellow` or `last_report = never`, print a detail block:
+
+```
+⚠  Projects needing attention:
+
+  event-pool          never reported — run /report-orchestrator to generate first reports
+  event-rental        health: yellow — last commit 9 days ago, 1 contributor
+```
+
+Pull the `health_details` string from the project-index frontmatter for the detail line. If no project-index exists, show `never reported — run /report-orchestrator to generate first reports`.
+
+### 5. Report coverage summary
+
+Print a brief coverage line showing how many of each report type exist across all projects:
+
+```
+  Report coverage: 47 daily  ·  12 weekly  ·  3 monthly  ·  1 yearly
+```
+
+This is purely a count of matching files in the vault across all project folders.
 
 ---
 

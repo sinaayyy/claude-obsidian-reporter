@@ -6,6 +6,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [3.1.0]: 2026-03-22
+
+### Added
+- **Enriched frontmatter**: all report types now include `contributors` (YAML array of distinct author names for the period), `files_changed`, `insertions`, `deletions` (from `git --shortstat`), `branches` (active branches), `generated_at` (ISO-8601 generation timestamp), and `generator_version`
+- **Project health indicators**: Dashboard now shows a color-coded health callout per project (`[!success]` / `[!warning]` / `[!danger]`) based on commit frequency, days since last commit, contributor concentration (bus factor), and commit message quality
+- **Charts in Dashboard**: 3 auto-generated charts — bar chart (commits/day per project, last 30 days), line chart (weekly velocity trend, 8 weeks), pie chart (commit distribution across projects) — via the Charts plugin
+- **Chart in monthly reports**: bar chart showing commit distribution per day of the month
+- **Chart in project-index**: line chart showing monthly commit activity over the project's lifetime
+- **Meta Bind widgets in project-index**: interactive dropdowns for `project_status` (active/paused/archived), `priority` (high/medium/low), and a text field for `risk_notes` — stored in frontmatter, queryable by Dataview
+- **Contributor Activity Dataview table** in Dashboard: cross-project weekly view of contributors, files changed, and insertions
+- **Recommended plugins guide**: `docs/recommended-plugins.md` with installation and configuration for 7 plugins (Homepage, Breadcrumbs, Charts, Tracker, Calendar, Periodic Notes, Meta Bind)
+- **README**: new "Recommended Plugins" section
+
+### Changed
+- Project-index frontmatter extended with `contributors`, `health`, `health_details`, `project_status`, `priority`, `risk_notes`, `generated_at`, `generator_version`
+- Step 6 in SKILL.md split into 6b (chart data computation), 6c (health scoring), and 6d (dashboard write) for clarity
+- `{{contributors}}` placeholder now produces a YAML inline array (`["Alice", "Bob"]`) on all report types, not just project-index
+- Dataview prerequisites updated from "optional" to "required" in README
+
+---
+
 ## [3.0.0]: 2026-03-19
 
 ### Added
